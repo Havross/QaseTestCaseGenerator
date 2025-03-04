@@ -1,9 +1,12 @@
-﻿using QaseTestCaseGenerator.Commands;
+﻿using Octokit;
+using QaseTestCaseGenerator.Commands;
 using QaseTestCaseGenerator.Models;
 using QaseTestCaseGenerator.Static;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
@@ -16,6 +19,78 @@ namespace QaseTestCaseGenerator.Settings
 {
     internal class AppSettings
     {
+        private const string CurrentVersion = "1.0.0";
+        private const string Owner = "Havross";
+        private const string Repo = "QaseTestCaseGenerator";
+        public static async Task CheckForUpdates()
+        {
+            try
+            {
+                var github = new GitHubClient(new Octokit.ProductHeaderValue(Repo));
+                var releases = await github.Repository.Release.GetAll(Owner, Repo);
+                var latestRelease = releases[0];
+                var latestVersion = latestRelease.TagName;
+                string downloadUrl = latestRelease.Assets[0].BrowserDownloadUrl;
+                if(IsNewerVersion(CurrentVersion, latestVersion))
+                {
+                    AnsiConsole.MarkupLine($"[blue]Newer version '{latestVersion}' available, started downloading...[/]");
+                    await DownloadAndReplace(downloadUrl);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[green]You are currently running latest stable version[/]");
+                }
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Update failed {ex.Message}[/]");
+            }
+        }
+        private static bool IsNewerVersion(string current, string latest)
+        {
+            Version currentVer = new Version(current);
+            Version latestVer = new Version(latest);
+            return latestVer > currentVer;
+        }
+
+        private static async Task DownloadAndReplace(string downloadUrl)
+        {
+            string tempZip = "update.zip";
+            string extractPath = "update_temp";
+            string currentFile = Process.GetCurrentProcess().MainModule.FileName;
+
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    byte[] fileBytes = await client.GetByteArrayAsync(downloadUrl);
+                    await File.WriteAllBytesAsync(tempZip, fileBytes);
+                }
+
+                Console.WriteLine("Update downloaded. Extracting...");
+
+                if (Directory.Exists(extractPath))
+                    Directory.Delete(extractPath, true);
+
+                ZipFile.ExtractToDirectory(tempZip, extractPath);
+
+                string newExe = Directory.GetFiles(extractPath, "*.exe")[0];
+
+                Console.WriteLine("Replacing old version...");
+                File.Move(newExe, currentFile, true);
+
+                Console.WriteLine("Update complete! Restarting application...");
+                Process.Start(currentFile);
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Update failed: {ex.Message}");
+            }
+        }
+
+
+
         public static void InitializeClients()
         {
             AnsiConsole.MarkupLine("[blue]Creating HttpClients....[/]");
