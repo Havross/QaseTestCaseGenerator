@@ -3,19 +3,9 @@ using QaseTestCaseGenerator.Commands;
 using QaseTestCaseGenerator.Models;
 using QaseTestCaseGenerator.Static;
 using Spectre.Console;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Linq;
-using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Settings
 {

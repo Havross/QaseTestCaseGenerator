@@ -1,13 +1,7 @@
 ﻿using QaseTestCaseGenerator.Models;
 using QaseTestCaseGenerator.Static;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Settings
 {

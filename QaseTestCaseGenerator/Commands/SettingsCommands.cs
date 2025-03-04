@@ -1,15 +1,10 @@
 ﻿using QaseTestCaseGenerator.Models;
 using QaseTestCaseGenerator.Settings;
-using QaseTestCaseGenerator.Static;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Commands
 {
