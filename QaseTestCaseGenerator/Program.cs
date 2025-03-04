@@ -27,6 +27,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
+        await AppSettings.CheckForUpdates();
         AppSettings.InitializeClients();
         AppSettings.InitializeCommands();
         IOSettings.InitializeConsole();

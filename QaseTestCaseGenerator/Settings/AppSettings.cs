@@ -19,7 +19,7 @@ namespace QaseTestCaseGenerator.Settings
 {
     internal class AppSettings
     {
-        private const string CurrentVersion = "1.0.0";
+        private const string CurrentVersion = "v1.0.1";
         private const string Owner = "Havross";
         private const string Repo = "QaseTestCaseGenerator";
         public static async Task CheckForUpdates()
@@ -30,7 +30,7 @@ namespace QaseTestCaseGenerator.Settings
                 var releases = await github.Repository.Release.GetAll(Owner, Repo);
                 var latestRelease = releases[0];
                 var latestVersion = latestRelease.TagName;
-                string downloadUrl = latestRelease.Assets[0].BrowserDownloadUrl;
+                string downloadUrl = latestRelease.ZipballUrl;
                 if(IsNewerVersion(CurrentVersion, latestVersion))
                 {
                     AnsiConsole.MarkupLine($"[blue]Newer version '{latestVersion}' available, started downloading...[/]");
@@ -48,6 +48,8 @@ namespace QaseTestCaseGenerator.Settings
         }
         private static bool IsNewerVersion(string current, string latest)
         {
+            current = current.TrimStart('v');
+            latest = latest.TrimStart('v');
             Version currentVer = new Version(current);
             Version latestVer = new Version(latest);
             return latestVer > currentVer;
