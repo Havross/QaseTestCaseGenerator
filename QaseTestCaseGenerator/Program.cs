@@ -27,7 +27,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        //await AppSettings.CheckForUpdates(); // Dont update on development
+        await AppSettings.CheckForUpdates(); // Dont update on development
         AppSettings.InitializeClients();
         AppSettings.InitializeCommands();
         IOSettings.InitializeConsole();
