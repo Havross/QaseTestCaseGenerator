@@ -11,6 +11,7 @@ namespace QaseTestCaseGenerator.Models
 {
     public class TestCase
     {
+        #region Properties
         [JsonPropertyName("title")]
         public required string Title { get; set; }
 
@@ -77,8 +78,9 @@ namespace QaseTestCaseGenerator.Models
 
         [JsonPropertyName("custom_field")]
         public Dictionary<int, string> CustomField { get; set; } = new();
+        #endregion
 
-
+        #region Public Methods
         public void Enrich()
         {
             Postconditions = TestCaseSettings.Postconditions;
@@ -95,5 +97,6 @@ namespace QaseTestCaseGenerator.Models
             Automation = TestCaseSettings.Automation;
             CreatedAt = DateTime.Now;
         }
+        #endregion
     }
 }

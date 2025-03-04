@@ -8,6 +8,7 @@ namespace QaseTestCaseGenerator.Settings
 {
     public class TestCaseSettings
     {
+        #region Properties
         public static string? Postconditions { get; set; }
         public static int? Status { get; set; } = 1; // 1 = New, 2 = In Progress, 3 = Passed, 4 = Failed, etc.
 
@@ -34,5 +35,6 @@ namespace QaseTestCaseGenerator.Settings
         public static DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 
         public static DateTime? UpdatedAt { get; set; } = null;
+        #endregion
     }
 }

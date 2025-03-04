@@ -11,6 +11,7 @@ namespace QaseTestCaseGenerator.Commands
 {
     internal class ShowCommands
     {
+        #region Commands
         public static Action About()
         {
             return () =>
@@ -23,7 +24,7 @@ namespace QaseTestCaseGenerator.Commands
                         .Centered()
                         .Color(Color.Blue));
 
-                AnsiConsole.MarkupLine("[bold green]● Welcome to the OpenAI Test Case Generator CLI![/]\n");
+                AnsiConsole.MarkupLine("[bold green]▲ Welcome to the OpenAI Test Case Generator CLI![/]\n");
 
                 AnsiConsole.Write(
                     new Panel("[yellow]This tool helps you generate, manage, and export structured test cases using AI.[/]")
@@ -33,18 +34,18 @@ namespace QaseTestCaseGenerator.Commands
                 );
 
                 AnsiConsole.MarkupLine("\n[bold cyan]Features:[/]");
-                AnsiConsole.MarkupLine("- [green]●[/] Generate structured test cases from unstructured notes");
-                AnsiConsole.MarkupLine("- [green]●[/] Manually input test case descriptions");
-                AnsiConsole.MarkupLine("- [green]●[/] Export test cases to JSON");
-                AnsiConsole.MarkupLine("- [green]●[/] Modify OpenAI settings (API keys, models, etc.)");
-                AnsiConsole.MarkupLine("- [green]●[/] Choose OpenAI model (GPT-3.5 Turbo vs GPT-4o)");
-                AnsiConsole.MarkupLine("- [green]●[/] Save & Load profiles with encryption");
-                AnsiConsole.MarkupLine("- [green]●[/] Securely store API keys using AES encryption");
-                AnsiConsole.MarkupLine("- [green]●[/] Interactive menu with arrow keys and ENTER\n");
+                AnsiConsole.MarkupLine("- [green]▲[/] Generate structured test cases from unstructured notes");
+                AnsiConsole.MarkupLine("- [green]▲[/] Manually input test case descriptions");
+                AnsiConsole.MarkupLine("- [green]▲[/] Export test cases to JSON");
+                AnsiConsole.MarkupLine("- [green]▲[/] Modify OpenAI settings (API keys, models, etc.)");
+                AnsiConsole.MarkupLine("- [green]▲[/] Choose OpenAI model (GPT-3.5 Turbo vs GPT-4o)");
+                AnsiConsole.MarkupLine("- [green]▲[/] Save & Load profiles with encryption");
+                AnsiConsole.MarkupLine("- [green]▲[/] Securely store API keys using AES encryption");
+                AnsiConsole.MarkupLine("- [green]▲[/] Interactive menu with arrow keys and ENTER\n");
 
                 AnsiConsole.MarkupLine("[bold cyan]Navigation & Controls:[/]");
                 AnsiConsole.MarkupLine("- [yellow]→[/] Use arrow keys (↑ ↓) to navigate");
-                AnsiConsole.MarkupLine("- [green]●[/] Press ENTER to select");
+                AnsiConsole.MarkupLine("- [green]▲[/] Press ENTER to select");
                 AnsiConsole.MarkupLine("- [red]■[/] Press ESC to exit\n");
 
                 AnsiConsole.MarkupLine("[bold red]Security Features:[/]");
@@ -81,7 +82,7 @@ namespace QaseTestCaseGenerator.Commands
                         "[bold red]NOTE:[/] A default profile is available with an API key stored behind a password. It will eventually run out and will have to recharge (5$)."
                     )
                     .Border(BoxBorder.Rounded)
-                    .Header("[bold blue]● Available Methods[/]")
+                    .Header("[bold blue]▲ Available Methods[/]")
                     .Expand()
                 );
 
@@ -183,5 +184,6 @@ namespace QaseTestCaseGenerator.Commands
                     AnsiConsole.MarkupLine($"\t {item}");
             };
         }
+        #endregion
     }
 }

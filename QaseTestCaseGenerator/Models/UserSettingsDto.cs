@@ -9,13 +9,16 @@ namespace QaseTestCaseGenerator.Models
 {
     public class UserSettingsDto
     {
+        #region Properties
+        public required string UserTestCaseDirectory { get; set; }
+        public required string OpenAIModel { get; set; }
         public string? Adm2AuthCookie { get; set; }
         public string? JsessionIdCookie { get; set; }
         public string? OpenAIApiKey { get; set; }
         public string? QaseApiToken { get; set; }
-        public required string UserTestCaseDirectory { get; set; }
-        public required string OpenAIModel { get; set; }
-        
+        #endregion
+
+        #region Public Methods
         public static UserSettingsDto FromUserSettings()
         {
             return new UserSettingsDto
@@ -38,6 +41,6 @@ namespace QaseTestCaseGenerator.Models
             UserSettings.OpenAIModel = OpenAIModel;
             UserSettings.QaseApiToken = QaseApiToken;
         }
+        #endregion
     }
-
 }

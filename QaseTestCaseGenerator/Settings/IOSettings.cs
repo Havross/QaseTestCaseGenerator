@@ -13,14 +13,12 @@ namespace QaseTestCaseGenerator.Settings
 {
     public class IOSettings
     {
-        public static async Task HandleInput()
-        {
-            await SelectAndExecuteCommand();
-        }
-        public static void InitializeConsole()
-        {
-            Console.OutputEncoding = Encoding.Unicode;            
-        }
+        #region Public Methods
+        public static async Task HandleInput() => await SelectAndExecuteCommand();        
+        public static void InitializeConsole() => Console.OutputEncoding = Encoding.Unicode;
+        #endregion
+
+        #region Private Methods
         private static async Task SelectAndExecuteCommand()
         {
             while (true)
@@ -34,15 +32,6 @@ namespace QaseTestCaseGenerator.Settings
                         .UseConverter(cmd => cmd.CommandName ?? "COMMAND NAME MISSING!")
                         .AddChoices(StaticObjects.commands)
                 );
-
-                // Display the selected command in a panel
-                AnsiConsole.Write(
-                    new Panel($"[green]✔ Selected Command:[/] [yellow]{selectedCommand.CommandName}[/]")
-                        .Border(BoxBorder.Heavy)
-                        .Header("[green]▲ Command Selection[/]")
-                        .Expand()
-                );
-
                 if (selectedCommand != null)
                 {
                     Console.Clear(); 
@@ -61,15 +50,6 @@ namespace QaseTestCaseGenerator.Settings
                 }
             }
         }
-
-
-        private static (Command? commandToExecute, string[] commandArgs) ParseCommand(string input)
-        {
-            string[] inputParts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            string command = inputParts[0];
-            string[] commandArgs = inputParts.Length > 1 ? inputParts[1..] : Array.Empty<string>();
-            var commandToExecute = StaticObjects.commands.FirstOrDefault(c => c.CommandName == command) ?? null;
-            return new(commandToExecute , commandArgs);
-        }
+        #endregion
     }
 }

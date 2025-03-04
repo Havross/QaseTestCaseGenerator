@@ -15,6 +15,7 @@ namespace QaseTestCaseGenerator.Commands
 {
     internal class SettingsCommands
     {
+        #region Commands
         public static Action Exit()
         {
             return () =>
@@ -30,20 +31,20 @@ namespace QaseTestCaseGenerator.Commands
                 new SelectionPrompt<string>()
                     .Title($"[yellow]Select settings you want to change[/]")
                     .AddChoices(
-                  $"Postconditions, current value: '{TestCaseSettings.Postconditions}'"
-                , $"Status, current value: '{TestCaseSettings.Status}'"
-                , $"Priority, current value: '{TestCaseSettings.Priority}'"
-                , $"Severity, current value: '{TestCaseSettings.Severity}'"
-                , $"Behavior, current value: '{TestCaseSettings.Behavior}'"
-                , $"Type, current value: '{TestCaseSettings.Type}'"
-                , $"Layer, current value: '{TestCaseSettings.Layer}'"
-                , $"IsFlaky, current value: '{TestCaseSettings.IsFlaky}'"
-                , $"AuthorId, current value: '{TestCaseSettings.AuthorId}'"
-                , $"SuiteId, current value: '{TestCaseSettings.SuiteId}'"
-                , $"MilestoneId, current value: '{TestCaseSettings.MilestoneId}'"
-                , $"Automation, current value: '{TestCaseSettings.Automation}'"
-                , $"CreatedAt, current value: '{TestCaseSettings.CreatedAt}'"
-                , $"UpdatedAt, current value: '{TestCaseSettings.UpdatedAt}'"
+                  $"Postconditions"
+                , $"Status"
+                , $"Priority"
+                , $"Severity"
+                , $"Behavior"
+                , $"Type"
+                , $"Layer"
+                , $"IsFlaky"
+                , $"AuthorId"
+                , $"SuiteId"
+                , $"MilestoneId"
+                , $"Automation"
+                , $"CreatedAt"
+                , $"UpdatedAt"
                 , $"Return"));
                 switch (settingsSelected)
                 {
@@ -339,8 +340,23 @@ namespace QaseTestCaseGenerator.Commands
 
             };
         }
+        #endregion
 
+        #region Public Methods
+        public static List<string> GetAvailableProfiles()
+        {
+            List<string> profiles = new();
+            if (!Directory.Exists(UserSettings.ProfileDirectory))            
+                Directory.CreateDirectory(UserSettings.ProfileDirectory);
+            
+            foreach (var file in Directory.GetFiles(UserSettings.ProfileDirectory, "*.dat"))            
+                profiles.Add(Path.GetFileNameWithoutExtension(file));         
+            
+            return profiles;
+        }
+        #endregion
 
+        #region Private Methods
         private static byte[] EncryptData(string plainText, string password)
         {
             using var aes = Aes.Create();
@@ -357,20 +373,7 @@ namespace QaseTestCaseGenerator.Commands
             Array.Copy(encryptedBytes, 0, combinedData, aes.IV.Length, encryptedBytes.Length);
 
             return combinedData;
-        }
-        public static List<string> GetAvailableProfiles()
-        {
-            List<string> profiles = new();
-            if(!Directory.Exists(UserSettings.ProfileDirectory))
-            {
-                Directory.CreateDirectory(UserSettings.ProfileDirectory);
-            }
-            foreach (var file in Directory.GetFiles(UserSettings.ProfileDirectory, "*.dat"))
-            {
-                profiles.Add(Path.GetFileNameWithoutExtension(file));
-            }
-            return profiles;
-        }
+        }        
         private static string DecryptData(byte[] encryptedData, string password)
         {
             using var aes = Aes.Create();
@@ -389,12 +392,12 @@ namespace QaseTestCaseGenerator.Commands
 
             return Encoding.UTF8.GetString(decryptedBytes);
         }
-
         private static byte[] DeriveKeyFromPassword(string password, int keySize)
         {
             using var deriveBytes = new Rfc2898DeriveBytes(password, Encoding.UTF8.GetBytes("SALT_VALUE_HERE"), 10000, HashAlgorithmName.SHA256);
             return deriveBytes.GetBytes(keySize);
         }
+        #endregion
     }
 }
 

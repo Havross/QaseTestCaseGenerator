@@ -251,7 +251,7 @@ namespace QaseTestCaseGenerator.Commands
                     return;
                 }
                 AnsiConsole.Write(
-                    new Panel("[green]● Test cases successfully imported into Qase![/]")
+                    new Panel("[green]▲ Test cases successfully imported into Qase![/]")
                         .Border(BoxBorder.Rounded)
                         .BorderColor(Color.Green)
                         .Expand()

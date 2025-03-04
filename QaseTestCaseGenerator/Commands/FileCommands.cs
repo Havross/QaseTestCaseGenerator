@@ -12,21 +12,7 @@ namespace QaseTestCaseGenerator.Commands
 {
     public class FileCommands
     {
-        public static List<string> GetSavedTestCaseJsons()
-        {
-            AnsiConsole.MarkupLine("[cyan]Saved Test Cases:[/]\n");
-
-            if (!Directory.Exists("TestCases"))
-            {
-                AnsiConsole.MarkupLine("[red]No test case files found![/]");
-                return new();
-            }
-            List<string> files = Directory.GetFiles("TestCases")
-                                 .Select(Path.GetFileName)
-                                 .ToList();
-            return files;
-
-        }
+        #region Commands
         public static Func<Task> ShowSavedTestCaseJsons()
         {
             return async () =>
@@ -37,7 +23,7 @@ namespace QaseTestCaseGenerator.Commands
                 {
                     AnsiConsole.MarkupLine("[red]No test case files available![/]");
                     return;
-                }                
+                }
                 var selectedFile = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("[blue]Select a test case file:[/]")
@@ -89,6 +75,9 @@ namespace QaseTestCaseGenerator.Commands
                 }
             };
         }
+        #endregion
+
+        #region Private Methods
         private static void ShowFileContent(string selectedFile, string content)
         {
             AnsiConsole.MarkupLine($"[cyan]File Content of {selectedFile}:[/]\n");
@@ -102,7 +91,7 @@ namespace QaseTestCaseGenerator.Commands
             {
                 AnsiConsole.MarkupLine("[yellow]File deletion canceled![/]");
                 return;
-            }                
+            }
             var filePath = Path.Combine("TestCases", selectedFile);
             File.Delete(filePath);
             AnsiConsole.MarkupLine($"[green]File {selectedFile} deleted successfully![/]");
@@ -110,7 +99,7 @@ namespace QaseTestCaseGenerator.Commands
 
         private static void ShowFileInTestCaseViewer(string filePath, string content)
         {
-            AnsiConsole.MarkupLine("[cyan]● Opening TestCase Viewer...[/]");
+            AnsiConsole.MarkupLine("[cyan]▲ Opening TestCase Viewer...[/]");
 
             List<TestCase>? testCases;
             try
@@ -131,7 +120,7 @@ namespace QaseTestCaseGenerator.Commands
             {
                 Console.Clear();
 
-                if(testCases.FirstOrDefault(tc => tc.Title == "Return") == null)
+                if (testCases.FirstOrDefault(tc => tc.Title == "Return") == null)
                     testCases.Add(new TestCase { Title = "Return", Description = "", Steps = Array.Empty<TestStep>() });
                 if (testCases.FirstOrDefault(tc => tc.Title == "Save & Exit") == null)
                     testCases.Add(new TestCase { Title = "Save & Exit", Description = "", Steps = Array.Empty<TestStep>() });
@@ -143,12 +132,12 @@ namespace QaseTestCaseGenerator.Commands
                         .UseConverter(tc => tc.Title)
                         .AddChoices(testCases)
                 );
-                if(selectedTestCase.Title == "Return")
+                if (selectedTestCase.Title == "Return")
                 {
                     AnsiConsole.MarkupLine("[green]Returning to file selection...[/]");
                     return;
                 }
-                if(selectedTestCase.Title == "Save & Exit")
+                if (selectedTestCase.Title == "Save & Exit")
                 {
                     Save(testCases, filePath);
                     return;
@@ -156,7 +145,7 @@ namespace QaseTestCaseGenerator.Commands
                 // Display Selected Test Case
                 Console.Clear();
                 AnsiConsole.Write(
-                    new Panel($"[bold green]● Viewing Test Case[/]\n[blue]File:[/] [yellow]{Path.GetFileName(filePath)}[/]")
+                    new Panel($"[bold green]▲ Viewing Test Case[/]\n[blue]File:[/] [yellow]{Path.GetFileName(filePath)}[/]")
                         .Border(BoxBorder.Heavy)
                         .Expand()
                 );
@@ -217,14 +206,14 @@ namespace QaseTestCaseGenerator.Commands
             var saveExitTestCase = testCases.FirstOrDefault(tc => tc.Title == "Save & Exit");
             if (returnTestCase != null)
                 testCases.Remove(returnTestCase);
-            if(saveExitTestCase != null)
+            if (saveExitTestCase != null)
                 testCases.Remove(saveExitTestCase
                     );
 
-            foreach (var item in testCases)            
+            foreach (var item in testCases)
                 isValid = ValidateTestCase(item);
             if (!isValid)
-                return;            
+                return;
             var json = JsonSerializer.Serialize(testCases, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
             AnsiConsole.MarkupLine("[green]Test case saved successfully![/]");
@@ -250,5 +239,24 @@ namespace QaseTestCaseGenerator.Commands
             }
             return true;
         }
+        #endregion
+
+        #region Public Methods
+        public static List<string> GetSavedTestCaseJsons()
+        {
+            AnsiConsole.MarkupLine("[cyan]Saved Test Cases:[/]\n");
+
+            if (!Directory.Exists("TestCases"))
+            {
+                AnsiConsole.MarkupLine("[red]No test case files found![/]");
+                return new();
+            }
+            List<string> files = Directory.GetFiles("TestCases")
+                                 .Select(Path.GetFileName)
+                                 .ToList();
+            return files;
+
+        }
+        #endregion
     }
 }
