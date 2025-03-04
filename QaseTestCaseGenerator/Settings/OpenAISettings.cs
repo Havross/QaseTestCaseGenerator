@@ -25,6 +25,10 @@ namespace QaseTestCaseGenerator.Settings
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Constructs and returns the request body for the OpenAI API.
+        /// </summary>
+        /// <returns>An object representing the request body.</returns>
         public static object GetRequestBody()
         {
             return new
@@ -42,6 +46,10 @@ namespace QaseTestCaseGenerator.Settings
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Generates and returns a prompt for the OpenAI API based on the current notes and minimal test count.
+        /// </summary>
+        /// <returns>A string representing the prompt.</returns>
         private static string GeneratePrompt()
         {
             return $"Extract structured test cases from the following unstructured notes." +

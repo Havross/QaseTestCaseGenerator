@@ -81,6 +81,9 @@ namespace QaseTestCaseGenerator.Models
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Enriches the test case with additional settings from <see cref="TestCaseSettings"/>.
+        /// </summary>
         public void Enrich()
         {
             Postconditions = TestCaseSettings.Postconditions;

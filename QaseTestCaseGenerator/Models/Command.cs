@@ -20,6 +20,12 @@ namespace QaseTestCaseGenerator.Models
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Runs the specified command by name with the given arguments.
+        /// </summary>
+        /// <param name="commandName">The name of the command to run.</param>
+        /// <param name="args">The arguments to pass to the command method.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public static async Task RunCommand(string commandName, string[] args)
         {
             var command = StaticObjects.commands.FirstOrDefault(c => c.CommandName == commandName);

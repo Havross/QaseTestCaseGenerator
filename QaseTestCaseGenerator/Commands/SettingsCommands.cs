@@ -16,6 +16,10 @@ namespace QaseTestCaseGenerator.Commands
     internal class SettingsCommands
     {
         #region Commands
+        /// <summary>
+        /// Exits the application.
+        /// </summary>
+        /// <returns>An action that exits the application.</returns>
         public static Action Exit()
         {
             return () =>
@@ -23,6 +27,11 @@ namespace QaseTestCaseGenerator.Commands
                 Environment.Exit(0);
             };
         }
+
+        /// <summary>
+        /// Changes the Qase settings.
+        /// </summary>
+        /// <returns>An action that changes the Qase settings.</returns>
         public static Action ChangeQaseSettings()
         {
             return () =>
@@ -134,6 +143,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Changes the user settings.
+        /// </summary>
+        /// <returns>An action that changes the user settings.</returns>
         public static Action ChangeUserSettings()
         {
             return () =>
@@ -219,6 +232,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Saves the current user settings to a profile.
+        /// </summary>
+        /// <returns>An action that saves the user profile.</returns>
         public static Action SaveUserProfile()
         {
             return () =>
@@ -240,6 +257,11 @@ namespace QaseTestCaseGenerator.Commands
                 AnsiConsole.MarkupLine($"[green]Profile '{profileName}' saved successfully![/]");
             };
         }
+
+        /// <summary>
+        /// Deletes a saved user profile.
+        /// </summary>
+        /// <returns>An action that deletes the user profile.</returns>
         public static Action DeleteUserProfile()
         {
             return () =>
@@ -276,6 +298,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Loads a saved user profile.
+        /// </summary>
+        /// <returns>An action that loads the user profile.</returns>
         public static Action LoadUserProfile()
         {
             return () =>
@@ -325,6 +351,11 @@ namespace QaseTestCaseGenerator.Commands
                 }
             };
         }
+
+        /// <summary>
+        /// Saves the current Qase settings to a profile.
+        /// </summary>
+        /// <returns>An action that saves the Qase profile.</returns>
         public static Action SaveQaseProfile()
         {
             return () =>
@@ -333,6 +364,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Loads a saved Qase profile.
+        /// </summary>
+        /// <returns>An action that loads the Qase profile.</returns>
         public static Action LoadQaseProfile()
         {
             return () =>
@@ -343,6 +378,10 @@ namespace QaseTestCaseGenerator.Commands
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Gets the available user profiles.
+        /// </summary>
+        /// <returns>A list of available user profiles.</returns>
         public static List<string> GetAvailableProfiles()
         {
             List<string> profiles = new();
@@ -357,6 +396,12 @@ namespace QaseTestCaseGenerator.Commands
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Encrypts the given plain text using the specified password.
+        /// </summary>
+        /// <param name="plainText">The plain text to encrypt.</param>
+        /// <param name="password">The password to use for encryption.</param>
+        /// <returns>The encrypted data as a byte array.</returns>
         private static byte[] EncryptData(string plainText, string password)
         {
             using var aes = Aes.Create();
@@ -373,7 +418,14 @@ namespace QaseTestCaseGenerator.Commands
             Array.Copy(encryptedBytes, 0, combinedData, aes.IV.Length, encryptedBytes.Length);
 
             return combinedData;
-        }        
+        }
+
+        /// <summary>
+        /// Decrypts the given encrypted data using the specified password.
+        /// </summary>
+        /// <param name="encryptedData">The encrypted data to decrypt.</param>
+        /// <param name="password">The password to use for decryption.</param>
+        /// <returns>The decrypted plain text.</returns>
         private static string DecryptData(byte[] encryptedData, string password)
         {
             using var aes = Aes.Create();
@@ -392,6 +444,13 @@ namespace QaseTestCaseGenerator.Commands
 
             return Encoding.UTF8.GetString(decryptedBytes);
         }
+
+        /// <summary>
+        /// Derives a cryptographic key from the given password.
+        /// </summary>
+        /// <param name="password">The password to derive the key from.</param>
+        /// <param name="keySize">The size of the key to derive.</param>
+        /// <returns>The derived key as a byte array.</returns>
         private static byte[] DeriveKeyFromPassword(string password, int keySize)
         {
             using var deriveBytes = new Rfc2898DeriveBytes(password, Encoding.UTF8.GetBytes("SALT_VALUE_HERE"), 10000, HashAlgorithmName.SHA256);

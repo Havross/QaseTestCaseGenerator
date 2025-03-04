@@ -31,6 +31,10 @@ namespace QaseTestCaseGenerator.Settings
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Checks for updates from the GitHub repository and updates the application if a newer version is available.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public static async Task CheckForUpdates()
         {
             try
@@ -56,6 +60,10 @@ namespace QaseTestCaseGenerator.Settings
                 AnsiConsole.MarkupLine($"[red]Update failed {ex.Message}[/]");
             }
         }
+
+        /// <summary>
+        /// Initializes HTTP clients with specific configurations.
+        /// </summary>
         public static void InitializeClients()
         {
             AnsiConsole.MarkupLine("[blue]Creating HttpClients....[/]");
@@ -89,6 +97,10 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             AnsiConsole.MarkupLine("[green]Finished HTTP client configurations[/]");
         }
+
+        /// <summary>
+        /// Initializes commands for the application.
+        /// </summary>
         public static void InitializeCommands()
         {
             AnsiConsole.MarkupLine("[blue]Initializing commands....[/]");
@@ -98,6 +110,11 @@ namespace QaseTestCaseGenerator.Settings
             InitializeSettingsCommands();
             AnsiConsole.MarkupLine("[green]Finished command initialization[/]");
         }
+
+        /// <summary>
+        /// Runs the user interface, handling input and executing commands in a loop.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public static async Task RunInterface()
         {
             string command = string.Empty;
@@ -115,6 +132,9 @@ namespace QaseTestCaseGenerator.Settings
         }
 
         #region HttpClient Methods
+        /// <summary>
+        /// Prepares the OpenAI HTTP client for making requests by setting the API key.
+        /// </summary>
         public static void PrepareOpenAiHttpClientForRequest()
         {
             if (StaticObjects.openAiHttpClient == null)
@@ -137,6 +157,10 @@ namespace QaseTestCaseGenerator.Settings
                 AnsiConsole.MarkupLine("[green]OpenAI API Key updated.[/]");
             }
         }
+
+        /// <summary>
+        /// Prepares the Qase HTTP client for making requests by setting the API token.
+        /// </summary>
         public static void PrepareQaseHttpClientForRequest()
         {
             if (StaticObjects.qaseHttpClient == null)
@@ -174,6 +198,12 @@ namespace QaseTestCaseGenerator.Settings
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Determines if the latest version is newer than the current version.
+        /// </summary>
+        /// <param name="current">The current version.</param>
+        /// <param name="latest">The latest version.</param>
+        /// <returns>True if the latest version is newer; otherwise, false.</returns>
         private static bool IsNewerVersion(string current, string latest)
         {
             current = current.TrimStart('v');
@@ -182,6 +212,12 @@ namespace QaseTestCaseGenerator.Settings
             Version latestVer = new Version(latest);
             return latestVer > currentVer;
         }
+
+        /// <summary>
+        /// Downloads the update from the specified URL and replaces the current application files.
+        /// </summary>
+        /// <param name="downloadUrl">The URL to download the update from.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private static async Task DownloadAndReplace(string downloadUrl)
         {            
             using (HttpClient client = new HttpClient())
@@ -222,10 +258,17 @@ namespace QaseTestCaseGenerator.Settings
         }
 
         #region Command Initializers
+        /// <summary>
+        /// Initializes file-related commands.
+        /// </summary>
         private static void InitializeFileCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "browse_saved_jsons", CommandMethod = args => Task.Run(() => FileCommands.ShowSavedTestCaseJsons().Invoke()), Description = "Displays files in TestCases in a menu" });
         }
+
+        /// <summary>
+        /// Initializes Qase-related commands.
+        /// </summary>
         private static void InitializeQaseCommands()
         {
             StaticObjects.commands.Add(new Command
@@ -249,6 +292,10 @@ namespace QaseTestCaseGenerator.Settings
                 Description = "Sends json file to qase"
             });
         }
+
+        /// <summary>
+        /// Initializes settings-related commands.
+        /// </summary>
         private static void InitializeSettingsCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "save_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.SaveUserProfile().Invoke()), Description = "Saves current settings into a password protected profile" });
@@ -258,6 +305,10 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.commands.Add(new Command { CommandName = "delete_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.DeleteUserProfile().Invoke()), Description = "Deletes existing profile" });
             StaticObjects.commands.Add(new Command { CommandName = "exit", CommandMethod = args => Task.Run(() => SettingsCommands.Exit().Invoke()), Description = "Closes the app" });
         }
+
+        /// <summary>
+        /// Initializes show-related commands.
+        /// </summary>
         private static void InitializeShowCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "about", CommandMethod = args => Task.Run(() => ShowCommands.About().Invoke()), Description = "Shows information about the app" });

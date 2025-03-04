@@ -12,6 +12,10 @@ namespace QaseTestCaseGenerator.Commands
     internal class ShowCommands
     {
         #region Commands
+        /// <summary>
+        /// Displays information about the Qase Test Case Generator CLI.
+        /// </summary>
+        /// <returns>An action that displays the information.</returns>
         public static Action About()
         {
             return () =>
@@ -101,6 +105,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Displays the configuration of the HTTP clients.
+        /// </summary>
+        /// <returns>An action that displays the HTTP client configuration.</returns>
         public static Action ShowClientConfig()
         {
             return () =>
@@ -160,6 +168,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Displays all available commands.
+        /// </summary>
+        /// <returns>An action that displays the available commands.</returns>
         public static Action ShowAllCommands()
         {
             return () =>
@@ -170,6 +182,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Displays the available user profiles.
+        /// </summary>
+        /// <returns>An action that displays the user profiles.</returns>
         public static Action ShowUserProfiles()
         {
             return () =>

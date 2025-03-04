@@ -1,18 +1,16 @@
 ﻿using QaseTestCaseGenerator.Models;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Commands
 {
     public class FileCommands
     {
         #region Commands
+        /// <summary>
+        /// Displays a list of saved test case JSON files and allows the user to perform actions on them.
+        /// </summary>
+        /// <returns>A function that displays and manages saved test case JSON files.</returns>
         public static Func<Task> ShowSavedTestCaseJsons()
         {
             return async () =>
@@ -78,12 +76,21 @@ namespace QaseTestCaseGenerator.Commands
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Displays the content of the selected file.
+        /// </summary>
+        /// <param name="selectedFile">The selected file.</param>
+        /// <param name="content">The content of the file.</param>
         private static void ShowFileContent(string selectedFile, string content)
         {
             AnsiConsole.MarkupLine($"[cyan]File Content of {selectedFile}:[/]\n");
             AnsiConsole.WriteLine(content);
         }
 
+        /// <summary>
+        /// Deletes the selected file.
+        /// </summary>
+        /// <param name="selectedFile">The selected file.</param>
         private static void DeleteFile(string selectedFile)
         {
             string delete = AnsiConsole.Ask<string>("[red]Are you sure you want to delete this file? [/]([green]y[/]/[red]n[/])", "y");
@@ -97,6 +104,11 @@ namespace QaseTestCaseGenerator.Commands
             AnsiConsole.MarkupLine($"[green]File {selectedFile} deleted successfully![/]");
         }
 
+        /// <summary>
+        /// Displays the selected file in the test case viewer.
+        /// </summary>
+        /// <param name="filePath">The path of the file.</param>
+        /// <param name="content">The content of the file.</param>
         private static void ShowFileInTestCaseViewer(string filePath, string content)
         {
             AnsiConsole.MarkupLine("[cyan]▲ Opening TestCase Viewer...[/]");
@@ -199,6 +211,11 @@ namespace QaseTestCaseGenerator.Commands
             }
         }
 
+        /// <summary>
+        /// Saves the test cases to the specified file.
+        /// </summary>
+        /// <param name="testCases">The list of test cases to save.</param>
+        /// <param name="filePath">The path of the file to save to.</param>
         private static void Save(List<TestCase> testCases, string filePath)
         {
             bool isValid = true;
@@ -220,6 +237,12 @@ namespace QaseTestCaseGenerator.Commands
             AnsiConsole.MarkupLine("[red]Warning: Modifying JSON may result in incompatibility with Qase.[/]");
             AnsiConsole.MarkupLine("[red]Invalid data! Fix errors before saving.[/]");
         }
+
+        /// <summary>
+        /// Validates the specified test case.
+        /// </summary>
+        /// <param name="testCase">The test case to validate.</param>
+        /// <returns>True if the test case is valid; otherwise, false.</returns>
         private static bool ValidateTestCase(TestCase testCase)
         {
             if (string.IsNullOrWhiteSpace(testCase.Title))
@@ -242,6 +265,10 @@ namespace QaseTestCaseGenerator.Commands
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Gets the list of saved test case JSON files.
+        /// </summary>
+        /// <returns>A list of saved test case JSON files.</returns>
         public static List<string> GetSavedTestCaseJsons()
         {
             AnsiConsole.MarkupLine("[cyan]Saved Test Cases:[/]\n");

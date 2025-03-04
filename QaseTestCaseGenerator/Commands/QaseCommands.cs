@@ -22,6 +22,10 @@ namespace QaseTestCaseGenerator.Commands
     public class QaseCommands
     {
         #region Commands
+        /// <summary>
+        /// Generates test cases from a Confluence page.
+        /// </summary>
+        /// <returns>A function that generates test cases from a Confluence page.</returns>
         public static Func<Task> GenerateTestCasesFromConfluence()
         {
             return async () =>
@@ -74,6 +78,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Generates test cases from manually inserted text.
+        /// </summary>
+        /// <returns>A function that generates test cases from manually inserted text.</returns>
         public static Func<Task> GenerateTestCasesFromManualyInsertedText()
         {
             return async () =>
@@ -96,6 +104,11 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Sends a specified file to Qase.
+        /// </summary>
+        /// <param name="selectedFile">The file to send to Qase.</param>
+        /// <returns>A function that sends the specified file to Qase.</returns>
         public static Func<Task> SendFileToQase(string selectedFile)
         {
             return async () =>
@@ -103,6 +116,11 @@ namespace QaseTestCaseGenerator.Commands
                 await ImportDataIntoQase(selectedFile);
             };
         }
+
+        /// <summary>
+        /// Prompts the user to select a file and sends it to Qase.
+        /// </summary>
+        /// <returns>A function that prompts the user to select a file and sends it to Qase.</returns>
         public static Func<Task> SendFileToQase()
         {
             return async () =>
@@ -121,6 +139,10 @@ namespace QaseTestCaseGenerator.Commands
 
 
         #region Methods
+        /// <summary>
+        /// Generates and exports test cases from the provided notes.
+        /// </summary>
+        /// <param name="notes">The notes to generate test cases from.</param>
         private static async Task GenerateAndExportTests(string notes)
         {
             OpenAISettings.Notes = notes;
@@ -171,6 +193,10 @@ namespace QaseTestCaseGenerator.Commands
             AnsiConsole.MarkupLine("[green]Operation completed successfully![/]");
         }
 
+        /// <summary>
+        /// Imports data into Qase from the specified file.
+        /// </summary>
+        /// <param name="file">The file to import data from.</param>
         private static async Task ImportDataIntoQase(string file)
         {
             string filePath = $"{UserSettings.UserTestCaseDirectory}/{file}";
@@ -263,6 +289,12 @@ namespace QaseTestCaseGenerator.Commands
                 return;
             }
         }
+
+        /// <summary>
+        /// Extracts text from the provided HTML content.
+        /// </summary>
+        /// <param name="htmlContent">The HTML content to extract text from.</param>
+        /// <returns>The extracted text.</returns>
         private static string ExtractTextFromHtml(string htmlContent)
         {
             HtmlDocument doc = new HtmlDocument();
@@ -281,6 +313,12 @@ namespace QaseTestCaseGenerator.Commands
 
             return extractedText.ToString();
         }
+
+        /// <summary>
+        /// Parses the AI response into a list of test cases.
+        /// </summary>
+        /// <param name="aiResponse">The AI response to parse.</param>
+        /// <returns>A list of parsed test cases.</returns>
         private static List<TestCase> ParseAiResponseToTestCases(string aiResponse)
         {
             List<TestCase> testCases = new List<TestCase>();
@@ -337,6 +375,11 @@ namespace QaseTestCaseGenerator.Commands
             }
             return testCases;
         }
+
+        /// <summary>
+        /// Generates test cases using AI.
+        /// </summary>
+        /// <returns>A list of generated test cases.</returns>
         private static async Task<List<TestCase>> GenerateTestCasesWithAI()
         {
             var requestBody = OpenAISettings.GetRequestBody();

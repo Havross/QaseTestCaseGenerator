@@ -19,6 +19,10 @@ namespace QaseTestCaseGenerator.Models
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Creates a new instance of <see cref="UserSettingsDto"/> from the current user settings.
+        /// </summary>
+        /// <returns>A new instance of <see cref="UserSettingsDto"/>.</returns>
         public static UserSettingsDto FromUserSettings()
         {
             return new UserSettingsDto
@@ -32,6 +36,9 @@ namespace QaseTestCaseGenerator.Models
             };
         }
 
+        /// <summary>
+        /// Applies the settings from this instance to the current user settings.
+        /// </summary>
         public void ApplyToUserSettings()
         {
             UserSettings.Adm2AuthCookie = Adm2AuthCookie;

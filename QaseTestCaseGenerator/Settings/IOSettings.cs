@@ -14,11 +14,22 @@ namespace QaseTestCaseGenerator.Settings
     public class IOSettings
     {
         #region Public Methods
-        public static async Task HandleInput() => await SelectAndExecuteCommand();        
+        /// <summary>
+        /// Handles user input by selecting and executing commands asynchronously.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public static async Task HandleInput() => await SelectAndExecuteCommand();
+        /// <summary>
+        /// Initializes the console settings, setting the output encoding to Unicode.
+        /// </summary>
         public static void InitializeConsole() => Console.OutputEncoding = Encoding.Unicode;
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Continuously prompts the user to select and execute a command from a list of available commands.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private static async Task SelectAndExecuteCommand()
         {
             while (true)
