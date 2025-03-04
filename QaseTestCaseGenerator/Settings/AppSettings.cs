@@ -4,6 +4,7 @@ using QaseTestCaseGenerator.Models;
 using QaseTestCaseGenerator.Static;
 using Spectre.Console;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Compression;
@@ -13,15 +14,19 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Settings
 {
     internal class AppSettings
     {
-        private const string CurrentVersion = "v1.0.1";
+        public const string CurrentVersion = "v1.0.0";
         private const string Owner = "Havross";
         private const string Repo = "QaseTestCaseGenerator";
+        private const string TempZip = "update.zip";
+        private const string ExtractPath = "update_temp";
+        private const string UpdateScript = "update.ps1";
         public static async Task CheckForUpdates()
         {
             try
@@ -30,10 +35,11 @@ namespace QaseTestCaseGenerator.Settings
                 var releases = await github.Repository.Release.GetAll(Owner, Repo);
                 var latestRelease = releases[0];
                 var latestVersion = latestRelease.TagName;
-                string downloadUrl = latestRelease.ZipballUrl;
-                if(IsNewerVersion(CurrentVersion, latestVersion))
+                if (IsNewerVersion(CurrentVersion, latestVersion))
                 {
-                    AnsiConsole.MarkupLine($"[blue]Newer version '{latestVersion}' available, started downloading...[/]");
+                    string downloadUrl = latestRelease.Assets.FirstOrDefault(x => x.BrowserDownloadUrl.EndsWith(".zip")).BrowserDownloadUrl;
+                    AnsiConsole.MarkupLine($"[blue]Newer version '{latestVersion}' available, press any key to proceed with update...[/]");
+                    Console.ReadKey();
                     await DownloadAndReplace(downloadUrl);
                 }
                 else
@@ -55,43 +61,45 @@ namespace QaseTestCaseGenerator.Settings
             return latestVer > currentVer;
         }
 
-        private static async Task DownloadAndReplace(string downloadUrl)
-        {
-            string tempZip = "update.zip";
-            string extractPath = "update_temp";
-            string currentFile = Process.GetCurrentProcess().MainModule.FileName;
+        static async Task DownloadAndReplace(string downloadUrl)
+        {            
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0"); // Required for GitHub API
+                byte[] fileBytes = await client.GetByteArrayAsync(downloadUrl);
+                await File.WriteAllBytesAsync(TempZip, fileBytes);
+            }
 
+            Console.WriteLine("Update downloaded. Extracting...");
             try
             {
-                using (HttpClient client = new HttpClient())
+                if (Directory.Exists(ExtractPath))
+                    Directory.Delete(ExtractPath, true);
+
+                ZipFile.ExtractToDirectory(TempZip, ExtractPath);
+                if (File.Exists(UpdateScript))
                 {
-                    byte[] fileBytes = await client.GetByteArrayAsync(downloadUrl);
-                    await File.WriteAllBytesAsync(tempZip, fileBytes);
+                    ProcessStartInfo psi = new ProcessStartInfo
+                    {
+                        FileName = "powershell.exe",
+                        Arguments = $"-ExecutionPolicy Bypass -File \"{UpdateScript}\"",
+                        UseShellExecute = true,
+                        CreateNoWindow = false
+                    };
+                    Process.Start(psi);
+                    Process.GetCurrentProcess().Kill();
                 }
-
-                Console.WriteLine("Update downloaded. Extracting...");
-
-                if (Directory.Exists(extractPath))
-                    Directory.Delete(extractPath, true);
-
-                ZipFile.ExtractToDirectory(tempZip, extractPath);
-
-                string newExe = Directory.GetFiles(extractPath, "*.exe")[0];
-
-                Console.WriteLine("Replacing old version...");
-                File.Move(newExe, currentFile, true);
-
-                Console.WriteLine("Update complete! Restarting application...");
-                Process.Start(currentFile);
-                Environment.Exit(0);
+                else
+                {
+                    Console.WriteLine("ERROR: update.ps1 not found!");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Update failed: {ex.Message}");
             }
         }
-
-
+      
 
         public static void InitializeClients()
         {
@@ -149,7 +157,7 @@ namespace QaseTestCaseGenerator.Settings
                 }
                 catch (Exception)
                 {
-                    continue;                    
+                    continue;
                 }
             }
         }
@@ -177,7 +185,7 @@ namespace QaseTestCaseGenerator.Settings
                     new AuthenticationHeaderValue("Bearer", UserSettings.OpenAIApiKey);
 
                 AnsiConsole.MarkupLine("[green]OpenAI API Key updated.[/]");
-            }        
+            }
         }
 
 
@@ -214,7 +222,7 @@ namespace QaseTestCaseGenerator.Settings
                 StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             }
         }
-    
+
 
 
         private static void InitializeQaseCommands()
@@ -245,12 +253,12 @@ namespace QaseTestCaseGenerator.Settings
         {
             StaticObjects.commands.Add(new Command { CommandName = "save_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.SaveUserProfile().Invoke()), Description = "Saves current settings into a password protected profile" });
             StaticObjects.commands.Add(new Command { CommandName = "load_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.LoadUserProfile().Invoke()), Description = "Loads and applies settings from a profile" });
-            StaticObjects.commands.Add(new Command { CommandName = "change_qase_settings" , CommandMethod = args => Task.Run(() => SettingsCommands.ChangeQaseSettings().Invoke()), Description = "Change Qase settings" });
+            StaticObjects.commands.Add(new Command { CommandName = "change_qase_settings", CommandMethod = args => Task.Run(() => SettingsCommands.ChangeQaseSettings().Invoke()), Description = "Change Qase settings" });
             StaticObjects.commands.Add(new Command { CommandName = "change_user_settings", CommandMethod = args => Task.Run(() => SettingsCommands.ChangeUserSettings().Invoke()), Description = "Change user settings, app wont function properly if settings are not set" });
             StaticObjects.commands.Add(new Command { CommandName = "delete_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.DeleteUserProfile().Invoke()), Description = "Deletes existing profile" });
             StaticObjects.commands.Add(new Command { CommandName = "exit", CommandMethod = args => Task.Run(() => SettingsCommands.Exit().Invoke()), Description = "Closes the app" });
         }
-        
+
         private static void InitializeShowCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "about", CommandMethod = args => Task.Run(() => ShowCommands.About().Invoke()), Description = "Shows information about the app" });
@@ -259,7 +267,5 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.commands.Add(new Command { CommandName = "show_user_profiles", CommandMethod = args => Task.Run(() => ShowCommands.ShowUserProfiles().Invoke()), Description = "Shows user profiles" });
 
         }
-
-
     }
 }

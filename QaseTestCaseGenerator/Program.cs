@@ -27,12 +27,10 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        await AppSettings.CheckForUpdates();
+        //await AppSettings.CheckForUpdates(); // Dont update on development
         AppSettings.InitializeClients();
         AppSettings.InitializeCommands();
         IOSettings.InitializeConsole();
-
-        Console.WriteLine($"Current Output Encoding: {Console.OutputEncoding.EncodingName}");
         await Command.RunCommand("about", Array.Empty<string>());
         Console.ReadKey();
         await AppSettings.RunInterface();       

@@ -1,4 +1,5 @@
-﻿using QaseTestCaseGenerator.Static;
+﻿using QaseTestCaseGenerator.Settings;
+using QaseTestCaseGenerator.Static;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,14 @@ namespace QaseTestCaseGenerator.Commands
                 AnsiConsole.MarkupLine("[bold green]Need Help?[/]");
                 AnsiConsole.MarkupLine("stepan.havrlant@seznam.cz [blue]If you have questions, you can contact me via email[/]");
                 AnsiConsole.MarkupLine("https://platform.openai.com/docs [blue]Read OpenAI API Documentation[/]");
-
+                AnsiConsole.Write(
+                    new Panel(
+                        $"[bold cyan]Version {AppSettings.CurrentVersion}[/]\n"
+                    )
+                    .Border(BoxBorder.Heavy)
+                    .Header("[green]▲ Version: [/]")
+                    .Expand()
+                );
                 AnsiConsole.MarkupLine("\n[bold green]Enjoy using the Qase Test Case Generator CLI![/]");
             };
         }
