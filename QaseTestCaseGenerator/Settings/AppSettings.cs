@@ -3,30 +3,28 @@ using QaseTestCaseGenerator.Commands;
 using QaseTestCaseGenerator.Models;
 using QaseTestCaseGenerator.Static;
 using Spectre.Console;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Linq;
-using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Settings
 {
     internal class AppSettings
     {
-        public const string CurrentVersion = "v1.0.0";
+        #region Consts
+        public const string CurrentVersion = "v1.1.0";
         private const string Owner = "Havross";
         private const string Repo = "QaseTestCaseGenerator";
         private const string TempZip = "update.zip";
         private const string ExtractPath = "update_temp";
         private const string UpdateScript = "update.ps1";
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Checks for updates from the GitHub repository and updates the application if a newer version is available.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public static async Task CheckForUpdates()
         {
             try
@@ -52,6 +50,150 @@ namespace QaseTestCaseGenerator.Settings
                 AnsiConsole.MarkupLine($"[red]Update failed {ex.Message}[/]");
             }
         }
+
+        /// <summary>
+        /// Initializes HTTP clients with specific configurations.
+        /// </summary>
+        public static void InitializeClients()
+        {
+            AnsiConsole.MarkupLine("[blue]Creating HttpClients....[/]");
+
+            var handler = new HttpClientHandler
+            {
+                UseCookies = true,
+                CookieContainer = StaticObjects.cookieContainer
+            };
+
+            StaticObjects.confluenceHttpClient = new HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromSeconds(10)
+            };
+
+            StaticObjects.confluenceHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+            StaticObjects.confluenceHttpClient.DefaultRequestHeaders.Add("accept-language", "cs");
+
+            StaticObjects.openAiHttpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromMinutes(5)
+            };
+
+            StaticObjects.openAiHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+
+            StaticObjects.qaseHttpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(20)
+            };
+            StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            AnsiConsole.MarkupLine("[green]Finished HTTP client configurations[/]");
+        }
+
+        /// <summary>
+        /// Initializes commands for the application.
+        /// </summary>
+        public static void InitializeCommands()
+        {
+            AnsiConsole.MarkupLine("[blue]Initializing commands....[/]");
+            InitializeQaseCommands();
+            InitializeShowCommands();
+            InitializeFileCommands();
+            InitializeSettingsCommands();
+            AnsiConsole.MarkupLine("[green]Finished command initialization[/]");
+        }
+
+        /// <summary>
+        /// Runs the user interface, handling input and executing commands in a loop.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public static async Task RunInterface()
+        {
+            string command = string.Empty;
+            while (true)
+            {
+                try
+                {
+                    await IOSettings.HandleInput();
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+        }
+
+        #region HttpClient Methods
+        /// <summary>
+        /// Prepares the OpenAI HTTP client for making requests by setting the API key.
+        /// </summary>
+        public static void PrepareOpenAiHttpClientForRequest()
+        {
+            if (StaticObjects.openAiHttpClient == null)
+            {
+                AnsiConsole.MarkupLine("[red]HttpClient is not initialized! Call InitializeClient() first.[/]");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(UserSettings.OpenAIApiKey))
+            {
+                AnsiConsole.Markup("[yellow]Enter the OpenAI API key: [/]");
+                UserSettings.OpenAIApiKey = Console.ReadLine() ?? "";
+            }
+            var currentAuth = StaticObjects.openAiHttpClient.DefaultRequestHeaders.Authorization?.Parameter;
+            if (currentAuth != UserSettings.OpenAIApiKey)
+            {
+                StaticObjects.openAiHttpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", UserSettings.OpenAIApiKey);
+
+                AnsiConsole.MarkupLine("[green]OpenAI API Key updated.[/]");
+            }
+        }
+
+        /// <summary>
+        /// Prepares the Qase HTTP client for making requests by setting the API token.
+        /// </summary>
+        public static void PrepareQaseHttpClientForRequest()
+        {
+            if (StaticObjects.qaseHttpClient == null)
+            {
+                AnsiConsole.MarkupLine("[red]HttpClient is not initialized! Call InitializeClient() first.[/]");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(UserSettings.QaseApiToken))
+            {
+                AnsiConsole.Markup("[yellow]Enter the Qase API token: [/]");
+                UserSettings.QaseApiToken = Console.ReadLine() ?? "";
+            }
+
+            if (StaticObjects.qaseHttpClient.DefaultRequestHeaders.Contains("Token"))
+            {
+                var existingToken = StaticObjects.qaseHttpClient.DefaultRequestHeaders.GetValues("Token").FirstOrDefault();
+                if (existingToken != UserSettings.QaseApiToken)
+                {
+                    StaticObjects.qaseHttpClient.DefaultRequestHeaders.Remove("Token");
+                    StaticObjects.qaseHttpClient.DefaultRequestHeaders.Add("Token", UserSettings.QaseApiToken);
+                    AnsiConsole.MarkupLine("[green]Qase API Token updated.[/]");
+                }
+            }
+            else
+            {
+                StaticObjects.qaseHttpClient.DefaultRequestHeaders.Add("Token", UserSettings.QaseApiToken);
+            }
+            if (!StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Any(h => h.MediaType == "application/json"))
+            {
+                StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            }
+        }
+        #endregion
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Determines if the latest version is newer than the current version.
+        /// </summary>
+        /// <param name="current">The current version.</param>
+        /// <param name="latest">The latest version.</param>
+        /// <returns>True if the latest version is newer; otherwise, false.</returns>
         private static bool IsNewerVersion(string current, string latest)
         {
             current = current.TrimStart('v');
@@ -61,7 +203,12 @@ namespace QaseTestCaseGenerator.Settings
             return latestVer > currentVer;
         }
 
-        static async Task DownloadAndReplace(string downloadUrl)
+        /// <summary>
+        /// Downloads the update from the specified URL and replaces the current application files.
+        /// </summary>
+        /// <param name="downloadUrl">The URL to download the update from.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        private static async Task DownloadAndReplace(string downloadUrl)
         {            
             using (HttpClient client = new HttpClient())
             {
@@ -99,132 +246,19 @@ namespace QaseTestCaseGenerator.Settings
                 Console.WriteLine($"Update failed: {ex.Message}");
             }
         }
-      
 
-        public static void InitializeClients()
-        {
-            AnsiConsole.MarkupLine("[blue]Creating HttpClients....[/]");
-
-            var handler = new HttpClientHandler
-            {
-                UseCookies = true,
-                CookieContainer = StaticObjects.cookieContainer
-            };
-
-            StaticObjects.confluenceHttpClient = new HttpClient(handler)
-            {
-                Timeout = TimeSpan.FromSeconds(10)
-            };
-
-            // Set default headers
-            StaticObjects.confluenceHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
-            StaticObjects.confluenceHttpClient.DefaultRequestHeaders.Add("accept-language", "cs");
-
-            StaticObjects.openAiHttpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromMinutes(5)
-            };
-
-            StaticObjects.openAiHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-
-            StaticObjects.qaseHttpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(20)
-            };
-            StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            AnsiConsole.MarkupLine("[green]Finished HTTP client configurations[/]");
-        }
-
-        public static void InitializeCommands()
-        {
-            AnsiConsole.MarkupLine("[blue]Initializing commands....[/]");
-            InitializeQaseCommands();
-            InitializeShowCommands();
-            InitializeFileCommands();
-            InitializeSettingsCommands();
-            AnsiConsole.MarkupLine("[green]Finished command initialization[/]");
-        }
-
-        public static async Task RunInterface()
-        {
-            string command = string.Empty;
-            while (true)
-            {
-                try
-                {
-                    await IOSettings.HandleInput();
-                }
-                catch (Exception)
-                {
-                    continue;
-                }
-            }
-        }
-        public static void InitializeFileCommands()
+        #region Command Initializers
+        /// <summary>
+        /// Initializes file-related commands.
+        /// </summary>
+        private static void InitializeFileCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "browse_saved_jsons", CommandMethod = args => Task.Run(() => FileCommands.ShowSavedTestCaseJsons().Invoke()), Description = "Displays files in TestCases in a menu" });
         }
-        public static void PrepareOpenAiHttpClientForRequest()
-        {
-            if (StaticObjects.openAiHttpClient == null)
-            {
-                AnsiConsole.MarkupLine("[red]HttpClient is not initialized! Call InitializeClient() first.[/]");
-                return;
-            }
 
-            if (string.IsNullOrEmpty(UserSettings.OpenAIApiKey))
-            {
-                AnsiConsole.Markup("[yellow]Enter the OpenAI API key: [/]");
-                UserSettings.OpenAIApiKey = Console.ReadLine() ?? "";
-            }
-            var currentAuth = StaticObjects.openAiHttpClient.DefaultRequestHeaders.Authorization?.Parameter;
-            if (currentAuth != UserSettings.OpenAIApiKey)
-            {
-                StaticObjects.openAiHttpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", UserSettings.OpenAIApiKey);
-
-                AnsiConsole.MarkupLine("[green]OpenAI API Key updated.[/]");
-            }
-        }
-
-
-        public static void PrepareQaseHttpClientForRequest()
-        {
-            if (StaticObjects.qaseHttpClient == null)
-            {
-                AnsiConsole.MarkupLine("[red]HttpClient is not initialized! Call InitializeClient() first.[/]");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(UserSettings.QaseApiToken))
-            {
-                AnsiConsole.Markup("[yellow]Enter the Qase API token: [/]");
-                UserSettings.QaseApiToken = Console.ReadLine() ?? "";
-            }
-
-            if (StaticObjects.qaseHttpClient.DefaultRequestHeaders.Contains("Token"))
-            {
-                var existingToken = StaticObjects.qaseHttpClient.DefaultRequestHeaders.GetValues("Token").FirstOrDefault();
-                if (existingToken != UserSettings.QaseApiToken)
-                {
-                    StaticObjects.qaseHttpClient.DefaultRequestHeaders.Remove("Token");
-                    StaticObjects.qaseHttpClient.DefaultRequestHeaders.Add("Token", UserSettings.QaseApiToken);
-                    AnsiConsole.MarkupLine("[green]Qase API Token updated.[/]");
-                }
-            }
-            else
-            {
-                StaticObjects.qaseHttpClient.DefaultRequestHeaders.Add("Token", UserSettings.QaseApiToken);
-            }
-            if (!StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Any(h => h.MediaType == "application/json"))
-            {
-                StaticObjects.qaseHttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            }
-        }
-
-
-
+        /// <summary>
+        /// Initializes Qase-related commands.
+        /// </summary>
         private static void InitializeQaseCommands()
         {
             StaticObjects.commands.Add(new Command
@@ -249,6 +283,9 @@ namespace QaseTestCaseGenerator.Settings
             });
         }
 
+        /// <summary>
+        /// Initializes settings-related commands.
+        /// </summary>
         private static void InitializeSettingsCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "save_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.SaveUserProfile().Invoke()), Description = "Saves current settings into a password protected profile" });
@@ -259,6 +296,9 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.commands.Add(new Command { CommandName = "exit", CommandMethod = args => Task.Run(() => SettingsCommands.Exit().Invoke()), Description = "Closes the app" });
         }
 
+        /// <summary>
+        /// Initializes show-related commands.
+        /// </summary>
         private static void InitializeShowCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "about", CommandMethod = args => Task.Run(() => ShowCommands.About().Invoke()), Description = "Shows information about the app" });
@@ -267,5 +307,8 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.commands.Add(new Command { CommandName = "show_user_profiles", CommandMethod = args => Task.Run(() => ShowCommands.ShowUserProfiles().Invoke()), Description = "Shows user profiles" });
 
         }
+        #endregion
+        #endregion
+
     }
 }

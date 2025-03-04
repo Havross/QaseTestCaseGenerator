@@ -1,21 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using QaseTestCaseGenerator.Settings;
+﻿using QaseTestCaseGenerator.Settings;
 
 namespace QaseTestCaseGenerator.Models
 {
     public class UserSettingsDto
     {
+        #region Properties
+        public required string UserTestCaseDirectory { get; set; }
+        public required string OpenAIModel { get; set; }
         public string? Adm2AuthCookie { get; set; }
         public string? JsessionIdCookie { get; set; }
         public string? OpenAIApiKey { get; set; }
         public string? QaseApiToken { get; set; }
-        public required string UserTestCaseDirectory { get; set; }
-        public required string OpenAIModel { get; set; }
-        
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Creates a new instance of <see cref="UserSettingsDto"/> from the current user settings.
+        /// </summary>
+        /// <returns>A new instance of <see cref="UserSettingsDto"/>.</returns>
         public static UserSettingsDto FromUserSettings()
         {
             return new UserSettingsDto
@@ -29,6 +31,9 @@ namespace QaseTestCaseGenerator.Models
             };
         }
 
+        /// <summary>
+        /// Applies the settings from this instance to the current user settings.
+        /// </summary>
         public void ApplyToUserSettings()
         {
             UserSettings.Adm2AuthCookie = Adm2AuthCookie;
@@ -38,6 +43,6 @@ namespace QaseTestCaseGenerator.Models
             UserSettings.OpenAIModel = OpenAIModel;
             UserSettings.QaseApiToken = QaseApiToken;
         }
+        #endregion
     }
-
 }

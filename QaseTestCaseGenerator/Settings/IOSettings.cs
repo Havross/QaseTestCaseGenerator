@@ -1,26 +1,29 @@
 ﻿using QaseTestCaseGenerator.Models;
 using QaseTestCaseGenerator.Static;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Settings
 {
     public class IOSettings
     {
-        public static async Task HandleInput()
-        {
-            await SelectAndExecuteCommand();
-        }
-        public static void InitializeConsole()
-        {
-            Console.OutputEncoding = Encoding.Unicode;            
-        }
+        #region Public Methods
+        /// <summary>
+        /// Handles user input by selecting and executing commands asynchronously.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public static async Task HandleInput() => await SelectAndExecuteCommand();
+        /// <summary>
+        /// Initializes the console settings, setting the output encoding to Unicode.
+        /// </summary>
+        public static void InitializeConsole() => Console.OutputEncoding = Encoding.Unicode;
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Continuously prompts the user to select and execute a command from a list of available commands.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private static async Task SelectAndExecuteCommand()
         {
             while (true)
@@ -34,15 +37,6 @@ namespace QaseTestCaseGenerator.Settings
                         .UseConverter(cmd => cmd.CommandName ?? "COMMAND NAME MISSING!")
                         .AddChoices(StaticObjects.commands)
                 );
-
-                // Display the selected command in a panel
-                AnsiConsole.Write(
-                    new Panel($"[green]✔ Selected Command:[/] [yellow]{selectedCommand.CommandName}[/]")
-                        .Border(BoxBorder.Heavy)
-                        .Header("[green]▲ Command Selection[/]")
-                        .Expand()
-                );
-
                 if (selectedCommand != null)
                 {
                     Console.Clear(); 
@@ -61,15 +55,6 @@ namespace QaseTestCaseGenerator.Settings
                 }
             }
         }
-
-
-        private static (Command? commandToExecute, string[] commandArgs) ParseCommand(string input)
-        {
-            string[] inputParts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            string command = inputParts[0];
-            string[] commandArgs = inputParts.Length > 1 ? inputParts[1..] : Array.Empty<string>();
-            var commandToExecute = StaticObjects.commands.FirstOrDefault(c => c.CommandName == command) ?? null;
-            return new(commandToExecute , commandArgs);
-        }
+        #endregion
     }
 }

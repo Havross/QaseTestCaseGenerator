@@ -1,32 +1,16 @@
 ﻿using QaseTestCaseGenerator.Models;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace QaseTestCaseGenerator.Commands
 {
     public class FileCommands
     {
-        public static List<string> GetSavedTestCaseJsons()
-        {
-            AnsiConsole.MarkupLine("[cyan]Saved Test Cases:[/]\n");
-
-            if (!Directory.Exists("TestCases"))
-            {
-                AnsiConsole.MarkupLine("[red]No test case files found![/]");
-                return new();
-            }
-            List<string> files = Directory.GetFiles("TestCases")
-                                 .Select(Path.GetFileName)
-                                 .ToList();
-            return files;
-
-        }
+        #region Commands
+        /// <summary>
+        /// Displays a list of saved test case JSON files and allows the user to perform actions on them.
+        /// </summary>
+        /// <returns>A function that displays and manages saved test case JSON files.</returns>
         public static Func<Task> ShowSavedTestCaseJsons()
         {
             return async () =>
@@ -37,7 +21,7 @@ namespace QaseTestCaseGenerator.Commands
                 {
                     AnsiConsole.MarkupLine("[red]No test case files available![/]");
                     return;
-                }                
+                }
                 var selectedFile = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("[blue]Select a test case file:[/]")
@@ -89,12 +73,24 @@ namespace QaseTestCaseGenerator.Commands
                 }
             };
         }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Displays the content of the selected file.
+        /// </summary>
+        /// <param name="selectedFile">The selected file.</param>
+        /// <param name="content">The content of the file.</param>
         private static void ShowFileContent(string selectedFile, string content)
         {
             AnsiConsole.MarkupLine($"[cyan]File Content of {selectedFile}:[/]\n");
             AnsiConsole.WriteLine(content);
         }
 
+        /// <summary>
+        /// Deletes the selected file.
+        /// </summary>
+        /// <param name="selectedFile">The selected file.</param>
         private static void DeleteFile(string selectedFile)
         {
             string delete = AnsiConsole.Ask<string>("[red]Are you sure you want to delete this file? [/]([green]y[/]/[red]n[/])", "y");
@@ -102,15 +98,20 @@ namespace QaseTestCaseGenerator.Commands
             {
                 AnsiConsole.MarkupLine("[yellow]File deletion canceled![/]");
                 return;
-            }                
+            }
             var filePath = Path.Combine("TestCases", selectedFile);
             File.Delete(filePath);
             AnsiConsole.MarkupLine($"[green]File {selectedFile} deleted successfully![/]");
         }
 
+        /// <summary>
+        /// Displays the selected file in the test case viewer.
+        /// </summary>
+        /// <param name="filePath">The path of the file.</param>
+        /// <param name="content">The content of the file.</param>
         private static void ShowFileInTestCaseViewer(string filePath, string content)
         {
-            AnsiConsole.MarkupLine("[cyan]● Opening TestCase Viewer...[/]");
+            AnsiConsole.MarkupLine("[cyan]▲ Opening TestCase Viewer...[/]");
 
             List<TestCase>? testCases;
             try
@@ -131,7 +132,7 @@ namespace QaseTestCaseGenerator.Commands
             {
                 Console.Clear();
 
-                if(testCases.FirstOrDefault(tc => tc.Title == "Return") == null)
+                if (testCases.FirstOrDefault(tc => tc.Title == "Return") == null)
                     testCases.Add(new TestCase { Title = "Return", Description = "", Steps = Array.Empty<TestStep>() });
                 if (testCases.FirstOrDefault(tc => tc.Title == "Save & Exit") == null)
                     testCases.Add(new TestCase { Title = "Save & Exit", Description = "", Steps = Array.Empty<TestStep>() });
@@ -143,12 +144,12 @@ namespace QaseTestCaseGenerator.Commands
                         .UseConverter(tc => tc.Title)
                         .AddChoices(testCases)
                 );
-                if(selectedTestCase.Title == "Return")
+                if (selectedTestCase.Title == "Return")
                 {
                     AnsiConsole.MarkupLine("[green]Returning to file selection...[/]");
                     return;
                 }
-                if(selectedTestCase.Title == "Save & Exit")
+                if (selectedTestCase.Title == "Save & Exit")
                 {
                     Save(testCases, filePath);
                     return;
@@ -156,7 +157,7 @@ namespace QaseTestCaseGenerator.Commands
                 // Display Selected Test Case
                 Console.Clear();
                 AnsiConsole.Write(
-                    new Panel($"[bold green]● Viewing Test Case[/]\n[blue]File:[/] [yellow]{Path.GetFileName(filePath)}[/]")
+                    new Panel($"[bold green]▲ Viewing Test Case[/]\n[blue]File:[/] [yellow]{Path.GetFileName(filePath)}[/]")
                         .Border(BoxBorder.Heavy)
                         .Expand()
                 );
@@ -210,6 +211,11 @@ namespace QaseTestCaseGenerator.Commands
             }
         }
 
+        /// <summary>
+        /// Saves the test cases to the specified file.
+        /// </summary>
+        /// <param name="testCases">The list of test cases to save.</param>
+        /// <param name="filePath">The path of the file to save to.</param>
         private static void Save(List<TestCase> testCases, string filePath)
         {
             bool isValid = true;
@@ -217,20 +223,26 @@ namespace QaseTestCaseGenerator.Commands
             var saveExitTestCase = testCases.FirstOrDefault(tc => tc.Title == "Save & Exit");
             if (returnTestCase != null)
                 testCases.Remove(returnTestCase);
-            if(saveExitTestCase != null)
+            if (saveExitTestCase != null)
                 testCases.Remove(saveExitTestCase
                     );
 
-            foreach (var item in testCases)            
+            foreach (var item in testCases)
                 isValid = ValidateTestCase(item);
             if (!isValid)
-                return;            
+                return;
             var json = JsonSerializer.Serialize(testCases, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
             AnsiConsole.MarkupLine("[green]Test case saved successfully![/]");
             AnsiConsole.MarkupLine("[red]Warning: Modifying JSON may result in incompatibility with Qase.[/]");
             AnsiConsole.MarkupLine("[red]Invalid data! Fix errors before saving.[/]");
         }
+
+        /// <summary>
+        /// Validates the specified test case.
+        /// </summary>
+        /// <param name="testCase">The test case to validate.</param>
+        /// <returns>True if the test case is valid; otherwise, false.</returns>
         private static bool ValidateTestCase(TestCase testCase)
         {
             if (string.IsNullOrWhiteSpace(testCase.Title))
@@ -250,5 +262,28 @@ namespace QaseTestCaseGenerator.Commands
             }
             return true;
         }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Gets the list of saved test case JSON files.
+        /// </summary>
+        /// <returns>A list of saved test case JSON files.</returns>
+        public static List<string> GetSavedTestCaseJsons()
+        {
+            AnsiConsole.MarkupLine("[cyan]Saved Test Cases:[/]\n");
+
+            if (!Directory.Exists("TestCases"))
+            {
+                AnsiConsole.MarkupLine("[red]No test case files found![/]");
+                return new();
+            }
+            List<string> files = Directory.GetFiles("TestCases")
+                                 .Select(Path.GetFileName)
+                                 .ToList();
+            return files;
+
+        }
+        #endregion
     }
 }
