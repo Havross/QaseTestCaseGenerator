@@ -16,6 +16,10 @@
 
         #region Properties
         public static string Notes { get { return _notes; } set { _notes = value; _prompt = GeneratePrompt(); } }
+        public static Dictionary<string, string> OpenAIPrompts = new Dictionary<string, string>
+        {
+            {"", ""}
+        };
         #endregion
 
         #region Public Methods
