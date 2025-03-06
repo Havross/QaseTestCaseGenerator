@@ -74,8 +74,8 @@ namespace QaseTestCaseGenerator.Commands
                         "[green]■ Import to Qase:[/] Import structured test cases into Qase using your Qase Access Token.\n\n" +
                         "[green]■ Generate Test Cases from Confluence:[/] Extract structured test cases from Confluence pages using your session cookies.\n" +
                         "   - Requires two cookies from Confluence DevTools:\n" +
-                        "     • [yellow]JsessionIdCookie[/] (copy from your browser)\n" +
-                        "     • [yellow]Adm2AuthCookie[/] (copy from your browser)\n\n" +
+                        "     \t[yellow]JsessionIdCookie[/] (copy from your browser)\n" +
+                        "     \t[yellow]Adm2AuthCookie[/] (copy from your browser)\n\n" +
                         "[green]■ Generate Test Cases from Text:[/] Convert unstructured text into structured test cases using OpenAI.\n" +
                         "   - Requires an OpenAI API Key.\n\n" +
                         "[bold red]NOTE:[/] A default profile is available with an API key stored behind a password. It will eventually run out and will have to recharge (5$)."
@@ -160,6 +160,32 @@ namespace QaseTestCaseGenerator.Commands
                 {
                     AnsiConsole.MarkupLine("[red]\t--> openAI client is not initialized![/]");
                 }
+
+                AnsiConsole.MarkupLine("\n[blue]qase HTTP Client Configuration:[/]");
+                if (StaticObjects.openAiHttpClient != null)
+                {
+                    AnsiConsole.MarkupLine($"[white]\t--> Timeout: {StaticObjects.qaseHttpClient.Timeout.TotalSeconds} seconds[/]");
+
+                    var qaseAuthHeader = StaticObjects.qaseHttpClient.DefaultRequestHeaders.Authorization;
+                    AnsiConsole.MarkupLine($"[white]\t--> Authorization: {(qaseAuthHeader != null ? "[green]Bearer token configured[/]" : "[yellow]No authorization configured[/]")}[/]");
+
+                    if (StaticObjects.qaseHttpClient.DefaultRequestHeaders.Any())
+                    {
+                        AnsiConsole.MarkupLine("[white]\t--> Default Headers:[/]");
+                        foreach (var header in StaticObjects.qaseHttpClient.DefaultRequestHeaders)
+                        {
+                            AnsiConsole.MarkupLine($"[cyan]\t\t- {header.Key}: {string.Join(", ", header.Value)}[/]");
+                        }
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("[yellow]\t--> No default headers configured[/]");
+                    }
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]\t--> openAI client is not initialized![/]");
+                }
             };
         }
 
@@ -174,6 +200,22 @@ namespace QaseTestCaseGenerator.Commands
                 AnsiConsole.MarkupLine("[blue]Available commands:[/]");
                 foreach (var item in StaticObjects.commands)
                     AnsiConsole.MarkupLine($"[blue]\t -->   [white]{item.DetailedCommandName ?? item.CommandName ?? "[red]COMMAND NAME MISSING![/]"}[/] [green] | [/] [yellow]{item?.Description}[/][/]");
+            };
+        }
+
+        /// <summary>
+        /// Displays the available prompt templates.
+        /// </summary>
+        /// <returns>An action that display available prompt templates</returns>
+        public static Action ShowPromptTemplates()
+        {
+            return () =>
+            {
+                var promptSelected = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title($"[yellow]Select prompt template you want to view[/]")
+                        .AddChoices(OpenAISettings.OpenAIPrompts.Keys));
+                AnsiConsole.Write(new Panel($"[yellow]Selected prompt template: \n[/]{OpenAISettings.OpenAIPrompts[promptSelected]}").Expand());
             };
         }
 
