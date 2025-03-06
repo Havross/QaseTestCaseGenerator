@@ -305,6 +305,7 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.commands.Add(new Command { CommandName = "show_client_config", CommandMethod = args => Task.Run(() => ShowCommands.ShowClientConfig().Invoke()), Description = "Show httpclient setting" });
             StaticObjects.commands.Add(new Command { CommandName = "show_all_command_details", CommandMethod = args => Task.Run(() => ShowCommands.ShowAllCommands().Invoke()), Description = "Show all command details" });
             StaticObjects.commands.Add(new Command { CommandName = "show_user_profiles", CommandMethod = args => Task.Run(() => ShowCommands.ShowUserProfiles().Invoke()), Description = "Shows user profiles" });
+            StaticObjects.commands.Add(new Command { CommandName = "show_openai_prompt_templates", CommandMethod = args => Task.Run(() => ShowCommands.ShowPromptTemplates().Invoke()), Description = "Shows possible OpenAI prompt templates" });
 
         }
         #endregion

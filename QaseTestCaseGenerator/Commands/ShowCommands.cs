@@ -203,6 +203,10 @@ namespace QaseTestCaseGenerator.Commands
             };
         }
 
+        /// <summary>
+        /// Displays the available prompt templates.
+        /// </summary>
+        /// <returns>An action that display available prompt templates</returns>
         public static Action ShowPromptTemplates()
         {
             return () =>
@@ -210,8 +214,8 @@ namespace QaseTestCaseGenerator.Commands
                 var promptSelected = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title($"[yellow]Select prompt template you want to view[/]")
-                        .AddChoices());
-
+                        .AddChoices(OpenAISettings.OpenAIPrompts.Keys));
+                AnsiConsole.Write(new Panel($"[yellow]Selected prompt template: \n[/]{OpenAISettings.OpenAIPrompts[promptSelected]}").Expand());
             };
         }
 
