@@ -24,53 +24,6 @@ namespace QaseTestCaseGenerator.Commands
         }
 
         /// <summary>
-        /// Selects prompt that will be used in requests to Open AI.
-        /// </summary>
-        /// <returns>An action that changes current selected prompt.</returns>
-        public static Action SelectPrompt()
-        {
-            return () =>
-            {
-                var promptSelected = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("[yellow]Select a prompt to use[/]")
-                        .AddChoices(
-                            "Default",
-                            "Trade",
-                            "AMS",
-                            "AT",
-                            "Return"
-                        )
-                );
-
-                switch (promptSelected)
-                {
-                    case "Default":
-                        OpenAISettings.SetActivePrompt(PromptType.Default);
-                        break;
-
-                    case "Trade":
-                        OpenAISettings.SetActivePrompt(PromptType.Trade);
-                        break;
-
-                    case "AMS":
-                        OpenAISettings.SetActivePrompt(PromptType.AMS);
-                        break;
-
-                    case "AT":
-                        OpenAISettings.SetActivePrompt(PromptType.AT);
-                        break;
-
-                    case "Return":
-                        return;
-                }
-
-                AnsiConsole.MarkupLine("[green]Prompt selected successfully![/]");
-            };
-        }
-
-
-        /// <summary>
         /// Changes the Qase settings.
         /// </summary>
         /// <returns>An action that changes the Qase settings.</returns>
@@ -268,7 +221,7 @@ namespace QaseTestCaseGenerator.Commands
                         }
                         case "Prompt type":
                         {
-                            AnsiConsole.MarkupLine($"[yellow]Current prompt type: [fuchsia]'{UserSettings.PromptSettings}'[/][/]");
+                            AnsiConsole.MarkupLine($"[yellow]Current prompt type: [fuchsia]'{UserSettings.PromptSettings.Type}'[/][/]");
                             var selectedPrompt = AnsiConsole.Prompt(
                                 new SelectionPrompt<string>()
                                     .Title("[yellow]Which prompt type do you want to use?[/]")

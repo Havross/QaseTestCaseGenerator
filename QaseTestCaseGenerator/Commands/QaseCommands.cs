@@ -119,6 +119,11 @@ namespace QaseTestCaseGenerator.Commands
             return async () =>
             {
                 var testCases = FileCommands.GetSavedTestCaseJsons();
+                if(testCases == null || testCases.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[red]No test cases found![/]");
+                    return;
+                }
                 string selectedFile = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title("[yellow]Select the file you want to send to Qase:[/]")
@@ -211,13 +216,7 @@ namespace QaseTestCaseGenerator.Commands
                 AnsiConsole.MarkupLine($"[red]Failed to parse JSON: {ex.Message}[/]");
                 return;
             }
-            var requestBody = new
-            {
-                cases = testCases
-            };
-            string finalJson = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { WriteIndented = true });
-            AppSettings.PrepareQaseHttpClientForRequest();
-            var content = new StringContent(finalJson, Encoding.UTF8, "application/json");
+
             try
             {
                 string selectedQaseProject = AnsiConsole.Prompt(
@@ -230,15 +229,18 @@ namespace QaseTestCaseGenerator.Commands
 
                 AnsiConsole.Write(
                     new Panel(
-                        "[bold red]WARNING![/]\n" +
+                        "[bold yellow]WARNING![/]\n" +
                         "Make sure you have the **correct SuiteID** in the JSON.\n\n" +
                         "[red]If the wrong SuiteID is selected, you might import a LOT of tests into the wrong place![/]\n\n" +
-                        "[bold yellow]Double-check before continuing![/]"                    )
-                    .Header("[red]IMPORTANT WARNING[/]")
+                        "[bold yellow]Double-check before continuing![/]")
+                    .Header("[red]IMPORTANT NOTICE[/]")
                     .Border(BoxBorder.Heavy)
                     .Expand()
                 );
-                
+
+                testCases = AskUserAboutSuiteId(testCases, filePath);
+
+
                 var confirmation = AnsiConsole.Confirm("[bold green]Are you sure you want to continue?[/]");
 
                 if (!confirmation)
@@ -247,7 +249,13 @@ namespace QaseTestCaseGenerator.Commands
                     return;
                 }
                 AnsiConsole.MarkupLine("[blue]Sending test cases into qase...[/]");
-
+                var requestBody = new
+                {
+                    cases = testCases
+                };
+                string finalJson = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { WriteIndented = true });
+                AppSettings.PrepareQaseHttpClientForRequest();
+                var content = new StringContent(finalJson, Encoding.UTF8, "application/json");
                 string finalUrl = $"{QaseSettings.QaseBaseURL}/{selectedQaseProject}/bulk";
                 AnsiConsole.MarkupLine($"[grey]Sending to: {finalUrl}[/]");
                 bool success = await AnsiConsole.Status()
@@ -281,6 +289,62 @@ namespace QaseTestCaseGenerator.Commands
                 AnsiConsole.MarkupLine($"[red]There has been an error while sending request: {ex.Message}[/]");
                 return;
             }
+        }
+
+        /// <summary>
+        /// Asks the user about the SuiteId for the test cases and updates the SuiteId values.
+        /// </summary>
+        /// <param name="testCases">The list of test cases.</param>
+        /// <returns>The updated list of test cases with modified SuiteId values.</returns>
+        private static List<TestCase> AskUserAboutSuiteId(List<TestCase> testCases, string filePath = "")
+        {
+            var suiteIds = testCases.Select(tc => tc.SuiteId).Distinct().ToList();
+            int newSuiteId = 1;
+            if (suiteIds.Count == 0)            
+                AnsiConsole.MarkupLine("[yellow]No SuiteId found in the test cases! Please ensure your JSON contains SuiteIds.[/]");
+            
+            else
+            {
+                AnsiConsole.Markup("[yellow]Current SuiteId(s) found in test cases: [/]");
+                foreach (var suiteId in suiteIds)                
+                    AnsiConsole.Markup($"[green]{suiteId} [/]");
+                AnsiConsole.WriteLine();
+            }
+
+            bool changeSuiteId = AnsiConsole.Confirm("Do you want to change the SuiteId for all test cases?");
+
+            if (changeSuiteId)
+            {
+                newSuiteId = AnsiConsole.Ask<int>("Enter the new SuiteId: ");
+                foreach (var testCase in testCases)                
+                    testCase.SuiteId = newSuiteId;                
+
+                AnsiConsole.MarkupLine($"[green]SuiteId updated to '{newSuiteId}' for all test cases![/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]Keeping existing SuiteId(s).[/]");
+                return testCases;
+            }
+            if(string.IsNullOrEmpty(filePath))
+                return testCases;
+            bool replaceOriginalJson = AnsiConsole.Confirm("Do you want to save updated suite id in the json?");
+            if (replaceOriginalJson)
+            {
+                try
+                {
+                    string updatedJson = JsonSerializer.Serialize(testCases, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(filePath, updatedJson);
+                    AnsiConsole.MarkupLine("[green]Successfully updated the JSON file![/]");
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Failed to update the JSON file: {ex.Message}[/]");
+                }
+            }
+            else            
+                AnsiConsole.MarkupLine($"[yellow]Test cases will be imported with SuiteId '{newSuiteId}', but the json file will contain the original.[/]");            
+            return testCases;
         }
 
         /// <summary>
@@ -324,7 +388,7 @@ namespace QaseTestCaseGenerator.Commands
             {
                 string trimmedLine = line.Trim();
 
-                if (trimmedLine.StartsWith("Title:"))
+                if (trimmedLine.Contains("Title:"))
                 {
                     if (currentTestCase != null)
                     {
@@ -342,11 +406,11 @@ namespace QaseTestCaseGenerator.Commands
 
                     steps = new List<TestStep>();
                 }
-                else if (trimmedLine.StartsWith("Description:") && currentTestCase != null)
+                else if (trimmedLine.Contains("Description:") && currentTestCase != null)
                 {
                     currentTestCase.Description = trimmedLine.Replace("Description:", "").Trim();
                 }
-                else if (trimmedLine.StartsWith("Preconditions:") && currentTestCase != null)
+                else if (trimmedLine.Contains("Preconditions:") && currentTestCase != null)
                 {
                     string preconditions = trimmedLine.Replace("Preconditions:", "").Trim();
                     currentTestCase.Preconditions = string.IsNullOrWhiteSpace(preconditions) ? "None" : preconditions;
@@ -356,7 +420,7 @@ namespace QaseTestCaseGenerator.Commands
                     string stepText = Regex.Replace(trimmedLine, @"^\d+\.", "").Trim();
                     steps.Add(new TestStep { Action = stepText, ExpectedResult = "[Missing Expected Result]" });
                 }
-                else if (trimmedLine.StartsWith("Expected:") && steps.Count > 0)
+                else if (trimmedLine.Contains("Expected:") && steps.Count > 0)
                 {
                     steps[^1].ExpectedResult = trimmedLine.Replace("Expected:", "").Trim();
                 }
