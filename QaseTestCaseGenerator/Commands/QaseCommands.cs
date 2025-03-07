@@ -138,7 +138,7 @@ namespace QaseTestCaseGenerator.Commands
         /// <param name="notes">The notes to generate test cases from.</param>
         private static async Task GenerateAndExportTests(string notes)
         {
-            OpenAISettings.Notes = notes;
+            UserSettings.PromptSettings.Notes = notes;
             List<TestCase> testCases = await GenerateTestCasesWithAI();
             if(testCases.Count == 0)
             {

@@ -11,6 +11,7 @@ namespace QaseTestCaseGenerator.Models
         public string? JsessionIdCookie { get; set; }
         public string? OpenAIApiKey { get; set; }
         public string? QaseApiToken { get; set; }
+        public PromptSettings? PromptSettings { get; set; }
         #endregion
 
         #region Public Methods
@@ -27,7 +28,8 @@ namespace QaseTestCaseGenerator.Models
                 OpenAIApiKey = UserSettings.OpenAIApiKey,
                 UserTestCaseDirectory = UserSettings.UserTestCaseDirectory,
                 OpenAIModel = UserSettings.OpenAIModel,
-                QaseApiToken = UserSettings.QaseApiToken
+                QaseApiToken = UserSettings.QaseApiToken,
+                PromptSettings = UserSettings.PromptSettings
             };
         }
 
@@ -42,6 +44,7 @@ namespace QaseTestCaseGenerator.Models
             UserSettings.UserTestCaseDirectory = UserTestCaseDirectory;
             UserSettings.OpenAIModel = OpenAIModel;
             UserSettings.QaseApiToken = QaseApiToken;
+            UserSettings.PromptSettings = PromptSettings ?? OpenAISettings.OpenAIPrompts[PromptType.Default];
         }
         #endregion
     }

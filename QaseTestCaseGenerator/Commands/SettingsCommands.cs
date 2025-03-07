@@ -24,6 +24,53 @@ namespace QaseTestCaseGenerator.Commands
         }
 
         /// <summary>
+        /// Selects prompt that will be used in requests to Open AI.
+        /// </summary>
+        /// <returns>An action that changes current selected prompt.</returns>
+        public static Action SelectPrompt()
+        {
+            return () =>
+            {
+                var promptSelected = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("[yellow]Select a prompt to use[/]")
+                        .AddChoices(
+                            "Default",
+                            "Trade",
+                            "AMS",
+                            "AT",
+                            "Return"
+                        )
+                );
+
+                switch (promptSelected)
+                {
+                    case "Default":
+                        OpenAISettings.SetActivePrompt(PromptType.Default);
+                        break;
+
+                    case "Trade":
+                        OpenAISettings.SetActivePrompt(PromptType.Trade);
+                        break;
+
+                    case "AMS":
+                        OpenAISettings.SetActivePrompt(PromptType.AMS);
+                        break;
+
+                    case "AT":
+                        OpenAISettings.SetActivePrompt(PromptType.AT);
+                        break;
+
+                    case "Return":
+                        return;
+                }
+
+                AnsiConsole.MarkupLine("[green]Prompt selected successfully![/]");
+            };
+        }
+
+
+        /// <summary>
         /// Changes the Qase settings.
         /// </summary>
         /// <returns>An action that changes the Qase settings.</returns>
@@ -156,6 +203,7 @@ namespace QaseTestCaseGenerator.Commands
                         , "UserTestCaseDirectory"
                         , "QaseApiToken"
                         , "OpenAIModel"
+                        , "Prompt type"
                         , "Return"));
                 switch (settingsSelected)
                 {
@@ -189,6 +237,7 @@ namespace QaseTestCaseGenerator.Commands
                             if (newValue.ToLower() != "return") UserSettings.QaseApiToken = newValue;
                             break;
                         }
+
                     case "OpenAIModel":
                         {
                             AnsiConsole.MarkupLine($"[yellow]Current OpenAI model: [fuchsia]'{UserSettings.OpenAIModel}'[/][/]");
@@ -215,6 +264,43 @@ namespace QaseTestCaseGenerator.Commands
                                     return;
                             }
                             AnsiConsole.MarkupLine($"[green]OpenAI model set to: {UserSettings.OpenAIModel}[/]");
+                            break;
+                        }
+                        case "Prompt type":
+                        {
+                            AnsiConsole.MarkupLine($"[yellow]Current prompt type: [fuchsia]'{UserSettings.PromptSettings}'[/][/]");
+                            var selectedPrompt = AnsiConsole.Prompt(
+                                new SelectionPrompt<string>()
+                                    .Title("[yellow]Which prompt type do you want to use?[/]")
+                                    .AddChoices(
+                                        "Default",
+                                        "Trade",
+                                        "AMS",
+                                        "AT",
+                                        "Return")
+                            );
+                            switch (selectedPrompt)
+                            {
+                                case "Default":
+                                    UserSettings.PromptSettings = OpenAISettings.OpenAIPrompts[PromptType.Default];
+                                    break;
+
+                                case "Trade":
+                                    UserSettings.PromptSettings = OpenAISettings.OpenAIPrompts[PromptType.Trade];
+                                    break;
+
+                                case "AMS":
+                                    UserSettings.PromptSettings = OpenAISettings.OpenAIPrompts[PromptType.AMS];
+                                    break;
+
+                                case "AT":
+                                    UserSettings.PromptSettings = OpenAISettings.OpenAIPrompts[PromptType.AT];
+                                    break;
+
+                                case "Return":
+                                    return;
+                            }
+                            AnsiConsole.MarkupLine($"[green]Prompt set to: {UserSettings.PromptSettings.Type}[/]");
                             break;
                         }
                     case "Return":
