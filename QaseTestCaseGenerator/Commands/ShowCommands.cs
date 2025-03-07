@@ -1,4 +1,5 @@
-﻿using QaseTestCaseGenerator.Settings;
+﻿using QaseTestCaseGenerator.Models;
+using QaseTestCaseGenerator.Settings;
 using QaseTestCaseGenerator.Static;
 using Spectre.Console;
 
@@ -212,12 +213,25 @@ namespace QaseTestCaseGenerator.Commands
             return () =>
             {
                 var promptSelected = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
+                    new SelectionPrompt<PromptType>()
                         .Title($"[yellow]Select prompt template you want to view[/]")
                         .AddChoices(OpenAISettings.OpenAIPrompts.Keys));
-                AnsiConsole.Write(new Panel($"[yellow]Selected prompt template: \n[/]{OpenAISettings.OpenAIPrompts[promptSelected]}").Expand());
+                AnsiConsole.Write(new Panel($"[yellow]Selected prompt template: \n[/]{OpenAISettings.OpenAIPrompts[promptSelected].PromptTemplate}").Expand());
             };
         }
+
+        /// <summary>
+        /// Displays the selected prompt.
+        /// </summary>
+        /// <returns>An action that display selected prompt</returns>
+        public static Action ShowCurrentPrompt()
+        {
+            return () =>
+            {
+                AnsiConsole.Write(new Panel($"[yellow]Selected prompt [fuchsia]{UserSettings.PromptSettings.Type}[/]: \n[/]{UserSettings.PromptSettings.Prompt}").Expand());
+            };
+        }
+
 
         /// <summary>
         /// Displays the available user profiles.
