@@ -60,17 +60,17 @@ namespace QaseTestCaseGenerator.Models
 
         private static string GenerateTradePrompt(bool asTemplate = false)
         {
-            return "";
+            return "NEPOUŽÍVAT, TENHLE PROMPT JE WIP";
         }
 
         private static string GenerateAMSPrompt(bool asTemplate = false)
         {
-            return "";
+            return "NEPOUŽÍVAT, TENHLE PROMPT JE WIP";
         }
 
         private static string GenerateATPrompt(bool asTemplate = false)
         {
-            return "";
+            return "NEPOUŽÍVAT, TENHLE PROMPT JE WIP";
         }
 
 

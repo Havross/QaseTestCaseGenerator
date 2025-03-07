@@ -12,7 +12,7 @@ namespace QaseTestCaseGenerator.Settings
     internal class AppSettings
     {
         #region Consts
-        public const string CurrentVersion = "v1.1.1";
+        public const string CurrentVersion = "v1.2.0";
         private const string Owner = "Havross";
         private const string Repo = "QaseTestCaseGenerator";
         private const string TempZip = "update.zip";
