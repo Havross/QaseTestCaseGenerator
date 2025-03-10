@@ -107,7 +107,6 @@ namespace QaseTestCaseGenerator.Settings
         /// <returns>A task representing the asynchronous operation.</returns>
         public static async Task RunInterface()
         {
-            string command = string.Empty;
             while (true)
             {
                 try
@@ -289,11 +288,10 @@ namespace QaseTestCaseGenerator.Settings
         private static void InitializeSettingsCommands()
         {
             StaticObjects.commands.Add(new Command { CommandName = "save_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.SaveUserProfile().Invoke()), Description = "Saves current settings into a password protected profile" });
-            StaticObjects.commands.Add(new Command { CommandName = "load_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.LoadUserProfile().Invoke()), Description = "Loads and applies settings from a profile" });
-            StaticObjects.commands.Add(new Command { CommandName = "change_qase_settings", CommandMethod = args => Task.Run(() => SettingsCommands.ChangeQaseSettings().Invoke()), Description = "Change Qase settings" });
-            StaticObjects.commands.Add(new Command { CommandName = "change_prompt", CommandMethod = args => Task.Run(() => SettingsCommands.SelectPrompt().Invoke()), Description = "Change current selected prompt" });
-            StaticObjects.commands.Add(new Command { CommandName = "change_user_settings", CommandMethod = args => Task.Run(() => SettingsCommands.ChangeUserSettings().Invoke()), Description = "Change user settings, app wont function properly if settings are not set" });
+            StaticObjects.commands.Add(new Command { CommandName = "load_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.LoadUserProfile().Invoke()), Description = "Loads and applies settings from a profile" });            
             StaticObjects.commands.Add(new Command { CommandName = "delete_user_profile", CommandMethod = args => Task.Run(() => SettingsCommands.DeleteUserProfile().Invoke()), Description = "Deletes existing profile" });
+            StaticObjects.commands.Add(new Command { CommandName = "change_qase_settings", CommandMethod = args => Task.Run(() => SettingsCommands.ChangeQaseSettings().Invoke()), Description = "Change Qase settings" });
+            StaticObjects.commands.Add(new Command { CommandName = "change_user_settings", CommandMethod = args => Task.Run(() => SettingsCommands.ChangeUserSettings().Invoke()), Description = "Change user settings, app wont function properly if settings are not set" });
             StaticObjects.commands.Add(new Command { CommandName = "exit", CommandMethod = args => Task.Run(() => SettingsCommands.Exit().Invoke()), Description = "Closes the app" });
         }
 
@@ -308,7 +306,6 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.commands.Add(new Command { CommandName = "show_user_profiles", CommandMethod = args => Task.Run(() => ShowCommands.ShowUserProfiles().Invoke()), Description = "Shows user profiles" });
             StaticObjects.commands.Add(new Command { CommandName = "show_openai_prompt_templates", CommandMethod = args => Task.Run(() => ShowCommands.ShowPromptTemplates().Invoke()), Description = "Shows possible OpenAI prompt templates" });
             StaticObjects.commands.Add(new Command { CommandName = "show_selected_prompt", CommandMethod = args => Task.Run(() => ShowCommands.ShowCurrentPrompt().Invoke()), Description = "Show currently selected prompt" });
-
         }
         #endregion
         #endregion

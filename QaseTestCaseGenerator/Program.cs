@@ -16,6 +16,3 @@ class Program
         await AppSettings.RunInterface();       
     }
 }
-
-
-
