@@ -107,7 +107,6 @@ namespace QaseTestCaseGenerator.Settings
         /// <returns>A task representing the asynchronous operation.</returns>
         public static async Task RunInterface()
         {
-            string command = string.Empty;
             while (true)
             {
                 try
@@ -307,7 +306,6 @@ namespace QaseTestCaseGenerator.Settings
             StaticObjects.commands.Add(new Command { CommandName = "show_user_profiles", CommandMethod = args => Task.Run(() => ShowCommands.ShowUserProfiles().Invoke()), Description = "Shows user profiles" });
             StaticObjects.commands.Add(new Command { CommandName = "show_openai_prompt_templates", CommandMethod = args => Task.Run(() => ShowCommands.ShowPromptTemplates().Invoke()), Description = "Shows possible OpenAI prompt templates" });
             StaticObjects.commands.Add(new Command { CommandName = "show_selected_prompt", CommandMethod = args => Task.Run(() => ShowCommands.ShowCurrentPrompt().Invoke()), Description = "Show currently selected prompt" });
-
         }
         #endregion
         #endregion
