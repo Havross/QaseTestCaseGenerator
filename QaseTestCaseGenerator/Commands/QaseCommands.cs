@@ -80,7 +80,7 @@ namespace QaseTestCaseGenerator.Commands
             return async () =>
             {
                 AnsiConsole.MarkupLine("[yellow]Please enter the text you want to generate test cases from. [/]");
-                AnsiConsole.MarkupLine("[grey](Type 'END' on a new line and press Enter to finish input.)[/]");
+                AnsiConsole.MarkupLine("[grey](Type 'END' on a new line or 'RETURN' and press Enter to either finish input or return to menu.)[/]");
                 StringBuilder enteredText = new StringBuilder();
                 string? line;
 
@@ -90,7 +90,8 @@ namespace QaseTestCaseGenerator.Commands
 
                     if (line?.Trim().ToUpper() == "END") 
                         break;
-
+                    if (line?.Trim().ToUpper() == "RETURN")
+                        return;
                     enteredText.AppendLine(line);
                 }
                 await GenerateAndExportTests(enteredText.ToString());
@@ -239,7 +240,7 @@ namespace QaseTestCaseGenerator.Commands
                 );
 
                 testCases = AskUserAboutSuiteId(testCases, filePath);
-
+                testCases = AskUserAboutTestCaseNames(testCases, filePath);
 
                 var confirmation = AnsiConsole.Confirm("[bold green]Are you sure you want to continue?[/]");
 
@@ -290,6 +291,62 @@ namespace QaseTestCaseGenerator.Commands
                 return;
             }
         }
+
+        /// <summary>
+        /// Checks if the test cases have a prefix separated by '|'. If not, prompts the user to add a prefix.
+        /// Optionally updates the JSON file with the new test case names.
+        /// </summary>
+        /// <param name="testCases">The list of test cases to check and update.</param>
+        /// <param name="filePath">The file path to the JSON file to update (optional).</param>
+        /// <returns>The updated list of test cases with prefixes added if necessary.</returns>
+        private static List<TestCase> AskUserAboutTestCaseNames(List<TestCase> testCases, string filePath = "")
+        {
+            bool hasPrefix = testCases.All(tc => tc.Title.Contains('|'));
+            if(hasPrefix)
+            {
+                var keepTestcasePrefix = AnsiConsole.Confirm("[green]All test cases have a prefix. Do you want to keep them?[/]");
+                if(keepTestcasePrefix)
+                    return testCases;
+            }
+            bool addPrefix = AnsiConsole.Confirm("Would you like to add a prefix to all test cases?");
+            if (addPrefix)
+            {
+                string prefix = AnsiConsole.Ask<string>("Enter the prefix (e.g., 'Partner | Dashboard'(don't end with '| ' it gets added automatically)):");
+                foreach (var testCase in testCases)
+                {
+                    var titleParts = testCase.Title.Split('|');
+                    var originalTitle = titleParts.Length > 1 ? titleParts[titleParts.Length - 1].Trim() : titleParts[0].Trim();
+                    testCase.Title = $"{prefix} | {originalTitle}";
+                }
+
+                AnsiConsole.MarkupLine("[green]Prefixes added successfully![/]");
+
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    bool replaceOriginalJson = AnsiConsole.Confirm("Do you want to save the updated test case names in the JSON file?");
+                    if (replaceOriginalJson)
+                    {
+                        try
+                        {
+                            string updatedJson = JsonSerializer.Serialize(testCases, new JsonSerializerOptions { WriteIndented = true });
+                            File.WriteAllText(filePath, updatedJson);
+                            AnsiConsole.MarkupLine("[green]Successfully updated the JSON file![/]");
+                        }
+                        catch (Exception ex)
+                        {
+                            AnsiConsole.MarkupLine($"[red]Failed to update the JSON file: {ex.Message}[/]");
+                        }
+                    }
+                    else                    
+                        AnsiConsole.MarkupLine("[yellow]Test cases will be imported with the new prefixes, but the JSON file will contain the original names.[/]");                    
+                }
+                return testCases;
+            }
+            else
+                AnsiConsole.MarkupLine("[yellow]Keeping existing test case names.[/]");
+            return testCases;
+        }   
+
 
         /// <summary>
         /// Asks the user about the SuiteId for the test cases and updates the SuiteId values.
