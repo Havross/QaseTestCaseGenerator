@@ -136,13 +136,18 @@ namespace QaseTestCaseGenerator.Commands
                     testCases.Add(new TestCase { Title = "Return", Description = "", Steps = Array.Empty<TestStep>() });
                 if (testCases.FirstOrDefault(tc => tc.Title == "Save & Exit") == null)
                     testCases.Add(new TestCase { Title = "Save & Exit", Description = "", Steps = Array.Empty<TestStep>() });
+
+                var numberedTestCases = testCases
+                    .Select((tc, index) => new { DisplayText = $"{index + 1}. {tc.Title}", TestCase = tc })
+                    .ToList();
+
                 var selectedTestCase = AnsiConsole.Prompt(
                     new SelectionPrompt<TestCase>()
                         .Title("[blue]Select a test case to view:[/]")
                         .PageSize(10)
                         .MoreChoicesText("[grey](Move up and down to select, press [green]Enter[/] to view/edit)[/]")
-                        .UseConverter(tc => tc.Title)
-                        .AddChoices(testCases)
+                        .UseConverter(tc => numberedTestCases.First(n => n.TestCase == tc).DisplayText)
+                        .AddChoices(numberedTestCases.Select(n => n.TestCase))
                 );
                 if (selectedTestCase.Title == "Return")
                 {
