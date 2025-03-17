@@ -107,9 +107,9 @@ namespace QaseTestCaseGenerator.Commands
         /// <summary>
         /// Displays the selected file in the test case viewer.
         /// </summary>
-        /// <param name="filePath">The path of the file.</param>
+        /// <param name="fileName">The filename.</param>
         /// <param name="content">The content of the file.</param>
-        private static void ShowFileInTestCaseViewer(string filePath, string content)
+        private static void ShowFileInTestCaseViewer(string fileName, string content)
         {
             AnsiConsole.MarkupLine("[cyan]▲ Opening TestCase Viewer...[/]");
 
@@ -136,13 +136,18 @@ namespace QaseTestCaseGenerator.Commands
                     testCases.Add(new TestCase { Title = "Return", Description = "", Steps = Array.Empty<TestStep>() });
                 if (testCases.FirstOrDefault(tc => tc.Title == "Save & Exit") == null)
                     testCases.Add(new TestCase { Title = "Save & Exit", Description = "", Steps = Array.Empty<TestStep>() });
+
+                var numberedTestCases = testCases
+                    .Select((tc, index) => new { DisplayText = $"{index + 1}. {tc.Title}", TestCase = tc })
+                    .ToList();
+
                 var selectedTestCase = AnsiConsole.Prompt(
                     new SelectionPrompt<TestCase>()
                         .Title("[blue]Select a test case to view:[/]")
                         .PageSize(10)
                         .MoreChoicesText("[grey](Move up and down to select, press [green]Enter[/] to view/edit)[/]")
-                        .UseConverter(tc => tc.Title)
-                        .AddChoices(testCases)
+                        .UseConverter(tc => numberedTestCases.First(n => n.TestCase == tc).DisplayText)
+                        .AddChoices(numberedTestCases.Select(n => n.TestCase))
                 );
                 if (selectedTestCase.Title == "Return")
                 {
@@ -151,13 +156,14 @@ namespace QaseTestCaseGenerator.Commands
                 }
                 if (selectedTestCase.Title == "Save & Exit")
                 {
-                    Save(testCases, filePath);
-                    return;
+                    if(Save(testCases, fileName))
+                        return;
+                    break;
                 }
                 // Display Selected Test Case
                 Console.Clear();
                 AnsiConsole.Write(
-                    new Panel($"[bold green]▲ Viewing Test Case[/]\n[blue]File:[/] [yellow]{Path.GetFileName(filePath)}[/]")
+                    new Panel($"[bold green]▲ Viewing Test Case[/]\n[blue]File:[/] [yellow]{fileName}[/]")
                         .Border(BoxBorder.Heavy)
                         .Expand()
                 );
@@ -212,13 +218,13 @@ namespace QaseTestCaseGenerator.Commands
         }
 
         /// <summary>
-        /// Saves the test cases to the specified file.
+        /// Saves the list of test cases to the specified file after validating them.
         /// </summary>
         /// <param name="testCases">The list of test cases to save.</param>
         /// <param name="filePath">The path of the file to save to.</param>
-        private static void Save(List<TestCase> testCases, string filePath)
+        /// <returns>True if the test cases were successfully saved; otherwise, false.</returns>
+        private static bool Save(List<TestCase> testCases, string fileName)
         {
-            bool isValid = true;
             var returnTestCase = testCases.FirstOrDefault(tc => tc.Title == "Return");
             var saveExitTestCase = testCases.FirstOrDefault(tc => tc.Title == "Save & Exit");
             if (returnTestCase != null)
@@ -227,40 +233,58 @@ namespace QaseTestCaseGenerator.Commands
                 testCases.Remove(saveExitTestCase
                     );
 
-            foreach (var item in testCases)
-                isValid = ValidateTestCase(item);
-            if (!isValid)
-                return;
+            var invalidTestCases = testCases
+                .Where(tc => !ValidateTestCase(tc))
+                .ToList();
+
+            if (invalidTestCases.Any())
+            {
+                AnsiConsole.MarkupLine("[red]Validation failed! Fix the errors before saving:[/]");
+                foreach (var testCase in invalidTestCases)                
+                    ValidateTestCase(testCase, showErrors: true);
+                return false;
+            }
+
             var json = JsonSerializer.Serialize(testCases, new JsonSerializerOptions { WriteIndented = true });
+
+            var filePath = Path.Combine("TestCases", fileName);
             File.WriteAllText(filePath, json);
             AnsiConsole.MarkupLine("[green]Test case saved successfully![/]");
-            AnsiConsole.MarkupLine("[red]Warning: Modifying JSON may result in incompatibility with Qase.[/]");
-            AnsiConsole.MarkupLine("[red]Invalid data! Fix errors before saving.[/]");
+            AnsiConsole.MarkupLine("[yellow]Warning: Modifying JSON may result in incompatibility with Qase.[/]");
+            return true;
         }
 
         /// <summary>
-        /// Validates the specified test case.
+        /// Validates the specified test case to ensure it meets the required criteria.
         /// </summary>
         /// <param name="testCase">The test case to validate.</param>
+        /// <param name="showErrors">Indicates whether to display validation errors.</param>
         /// <returns>True if the test case is valid; otherwise, false.</returns>
-        private static bool ValidateTestCase(TestCase testCase)
+        private static bool ValidateTestCase(TestCase testCase, bool showErrors = false)
         {
+            var isValid = true;
+
             if (string.IsNullOrWhiteSpace(testCase.Title))
             {
-                AnsiConsole.MarkupLine($"[red]Title cannot be empty! Description: {testCase.Description}[/]");
-                return false;
+                if (showErrors)
+                    AnsiConsole.MarkupLine($"[red]Error in test case: [bold]{testCase.Description}[/] → Title cannot be empty![/]");
+                isValid = false;
             }
+
             if (string.IsNullOrWhiteSpace(testCase.Description))
             {
-                AnsiConsole.MarkupLine($"[red]Description cannot be empty! Title: {testCase.Title}[/]");
-                return false;
+                if (showErrors)
+                    AnsiConsole.MarkupLine($"[red]Error in test case: [bold]{testCase.Title}[/] → Description cannot be empty![/]");
+                isValid = false;
             }
+
             if (testCase.Steps == null || testCase.Steps.Length == 0)
             {
-                AnsiConsole.MarkupLine($"[red]Test case must have at least one step! Title: {testCase.Title}[/]");
-                return false;
+                if (showErrors)
+                    AnsiConsole.MarkupLine($"[red]Error in test case: [bold]{testCase.Title}[/] → Must have at least one step![/]");
+                isValid = false;
             }
-            return true;
+            return isValid;
         }
         #endregion
 
