@@ -75,8 +75,8 @@ namespace QaseTestCaseGenerator.Commands
                         "[green]■ Import to Qase:[/] Import structured test cases into Qase using your Qase Access Token.\n\n" +
                         "[green]■ Generate Test Cases from Confluence:[/] Extract structured test cases from Confluence pages using your session cookies.\n" +
                         "   - Requires two cookies from Confluence DevTools:\n" +
-                        "     \t[yellow]JsessionIdCookie[/] (copy from your browser)\n" +
-                        "     \t[yellow]Adm2AuthCookie[/] (copy from your browser)\n\n" +
+                        "     [yellow]JsessionIdCookie[/] (copy from your browser)\n" +
+                        "     [yellow]Adm2AuthCookie[/] (copy from your browser)\n\n" +
                         "[green]■ Generate Test Cases from Text:[/] Convert unstructured text into structured test cases using OpenAI.\n" +
                         "   - Requires an OpenAI API Key.\n\n"
                     )
@@ -92,9 +92,9 @@ namespace QaseTestCaseGenerator.Commands
                     new Panel(
                         $"[bold cyan]Version {AppSettings.CurrentVersion}[/]\n"
                         + "[bold blue]Release notes: [/]\n"
-                        + "[green]\t-[/] Test case browser fixes\n"
-                        + "[green]\t-[/] Fixed bad parsing from HTML on generate from confluence\n"
-                        + "[green]\t-[/] Adjusted About text\n"
+                        + "[green]-[/] Test case browser fixes\n"
+                        + "[green]-[/] Fixed bad parsing from HTML on generate from confluence\n"
+                        + "[green]-[/] Adjusted About text\n"
                     )
                     .Border(BoxBorder.Heavy)
                     .Header("[green]▲ Version: [/]")
