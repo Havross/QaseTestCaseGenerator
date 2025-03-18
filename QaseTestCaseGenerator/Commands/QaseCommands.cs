@@ -67,7 +67,11 @@ namespace QaseTestCaseGenerator.Commands
                     AnsiConsole.MarkupLine($"[grey]Full text:[/]");
                     Console.WriteLine(extractedText);
                 }
-                await GenerateAndExportTests(extractedText);
+                string continueChoice = AnsiConsole.Ask<string>("[yellow]Do you want to create test cases from this text? [/]([green]y[/]/[red]n[/])", "y");
+
+                if (continueChoice == "y")
+                    await GenerateAndExportTests(extractedText);
+                return;
             };
         }
 
@@ -414,19 +418,31 @@ namespace QaseTestCaseGenerator.Commands
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(htmlContent);
 
-            // Remove all script, style, and unnecessary elements
             foreach (var script in doc.DocumentNode.SelectNodes("//script|//style") ?? Enumerable.Empty<HtmlNode>())
                 script.Remove();
 
-            // Extract all text from paragraphs and headings
             var extractedText = new StringBuilder();
-            foreach (var node in doc.DocumentNode.SelectNodes("//p | //h1 | //h2 | //h3 | //h4 | //h5 | //h6") ?? Enumerable.Empty<HtmlNode>())
-            {
-                extractedText.AppendLine(HtmlEntity.DeEntitize(node.InnerText.Trim()));
-            }
 
+            foreach (var node in doc.DocumentNode.SelectNodes("//p | //h1 | //h2 | //h3 | //h4 | //h5 | //h6") ?? Enumerable.Empty<HtmlNode>())            
+                extractedText.AppendLine(HtmlEntity.DeEntitize(node.InnerText.Trim()));            
+
+            foreach (var table in doc.DocumentNode.SelectNodes("//table") ?? Enumerable.Empty<HtmlNode>())
+            {
+                foreach (var row in table.SelectNodes(".//tr") ?? Enumerable.Empty<HtmlNode>())
+                {
+                    var rowText = new List<string>();
+                    foreach (var cell in row.SelectNodes(".//th | .//td") ?? Enumerable.Empty<HtmlNode>())
+                    {
+                        rowText.Add(HtmlEntity.DeEntitize(cell.InnerText.Trim()));
+                    }
+                    if (rowText.Count > 0)
+                        extractedText.AppendLine(string.Join(" | ", rowText));
+                }
+                extractedText.AppendLine(); 
+            }
             return extractedText.ToString();
         }
+
 
         /// <summary>
         /// Parses the AI response into a list of test cases.
