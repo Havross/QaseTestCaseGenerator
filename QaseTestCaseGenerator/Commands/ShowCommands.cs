@@ -78,8 +78,7 @@ namespace QaseTestCaseGenerator.Commands
                         "     \t[yellow]JsessionIdCookie[/] (copy from your browser)\n" +
                         "     \t[yellow]Adm2AuthCookie[/] (copy from your browser)\n\n" +
                         "[green]■ Generate Test Cases from Text:[/] Convert unstructured text into structured test cases using OpenAI.\n" +
-                        "   - Requires an OpenAI API Key.\n\n" +
-                        "[bold red]NOTE:[/] A default profile is available with an API key stored behind a password. It will eventually run out and will have to recharge (5$)."
+                        "   - Requires an OpenAI API Key.\n\n"
                     )
                     .Border(BoxBorder.Rounded)
                     .Header("[bold blue]▲ Available Methods[/]")
@@ -92,6 +91,10 @@ namespace QaseTestCaseGenerator.Commands
                 AnsiConsole.Write(
                     new Panel(
                         $"[bold cyan]Version {AppSettings.CurrentVersion}[/]\n"
+                        + "[bold blue]Release notes: [/]\n"
+                        + "[green]\t-[/] Test case browser fixes\n"
+                        + "[green]\t-[/] Fixed bad parsing from HTML on generate from confluence\n"
+                        + "[green]\t-[/] Adjusted About text\n"
                     )
                     .Border(BoxBorder.Heavy)
                     .Header("[green]▲ Version: [/]")
